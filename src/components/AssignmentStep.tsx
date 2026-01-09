@@ -85,16 +85,25 @@ export function AssignmentStep({
   const handleExportImage = async () => {
     if (tablesRef.current) {
       try {
+        // Hide the fixed position selector during export
+        const selector = document.querySelector(
+          ".fixed.bottom-20"
+        ) as HTMLElement;
+        if (selector) selector.style.display = "none";
+
         const canvas = await html2canvas(tablesRef.current, {
           scale: 2,
           backgroundColor: "#ffffff",
           useCORS: true,
           allowTaint: true,
-          logging: true,
+          logging: false,
           ignoreElements: (element) => {
             return element.classList.contains("no-export");
           },
         });
+
+        // Show the selector again
+        if (selector) selector.style.display = "";
 
         const link = document.createElement("a");
         link.href = canvas.toDataURL("image/png");
@@ -140,40 +149,28 @@ export function AssignmentStep({
       <div className="space-y-3">
         <div className="border-primary bg-primary/5 rounded-2xl border-l-4 p-6">
           <p className="text-sm text-slate-700 dark:text-slate-300">
-            <strong>Two ways to swap:</strong>
+            <strong>Click to Swap:</strong>
           </p>
-          <ul className="mt-2 ml-4 space-y-1 text-sm text-slate-700 dark:text-slate-300">
-            <li>
-              ✨ <strong>Click to Swap:</strong> Click 2 seats on the table to
-              exchange them
-            </li>
-          </ul>
+          <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
+            Click 2 seats on the table to exchange them. First seat will be highlighted in pink.
+          </p>
         </div>
-
-        {/* Click-to-swap indicator */}
-        {selectedSeat && (
-          <div className="border-secondary bg-secondary/5 rounded-2xl border-l-4 p-4">
-            <p className="text-sm font-semibold text-slate-900 dark:text-white">
-              🎯 First seat selected: Table {selectedSeat.tableId + 1}, Seat{" "}
-              {selectedSeat.seatNumber + 1}
-              {selectedSeat.participantId && (
-                <span className="ml-2 text-slate-600 dark:text-slate-400">
-                  (
-                  {
-                    participants.find(
-                      (p) => p.id === selectedSeat.participantId
-                    )?.name
-                  }
-                  )
-                </span>
-              )}
-            </p>
-            <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
-              Click another seat to swap, or click this seat again to cancel
-            </p>
-          </div>
-        )}
       </div>
+
+      {/* Click-to-swap indicator - overlay at bottom */}
+      {selectedSeat && (
+        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 bg-secondary/90 text-white rounded-lg px-6 py-3 shadow-lg whitespace-nowrap text-sm font-semibold">
+          🎯 Selected: Table {selectedSeat.tableId + 1}, Seat {selectedSeat.seatNumber + 1}
+          {selectedSeat.participantId && (
+            <span className="ml-2 font-normal">
+              ({participants.find((p) => p.id === selectedSeat.participantId)?.name})
+            </span>
+          )}
+          <p className="text-xs font-normal opacity-90 mt-1">
+            Click another seat to swap
+          </p>
+        </div>
+      )}
 
       {/* Tables Display */}
       <div

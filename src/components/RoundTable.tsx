@@ -102,17 +102,20 @@ export function RoundTable({
 
                 {/* Seat content */}
                 {participant ? (
-                  <text
-                    x={x}
-                    y={y}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    className="pointer-events-none text-xs font-bold text-slate-900 select-none"
-                    fill="currentColor"
-                    style={{ userSelect: "none" }}
-                  >
-                    {participant.name.substring(0, 12)}
-                  </text>
+                  <g>
+                    <title>{participant.name}</title>
+                    <text
+                      x={x}
+                      y={y}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="pointer-events-none text-xs font-bold text-slate-900 select-none"
+                      fill="currentColor"
+                      style={{ userSelect: "none" }}
+                    >
+                      {participant.name.split(" ").map((n) => n[0]).join("")}
+                    </text>
+                  </g>
                 ) : (
                   <text
                     x={x}
@@ -141,8 +144,9 @@ export function RoundTable({
             <div
               key={p.id}
               className="flex cursor-default items-center justify-between gap-2 rounded bg-white p-2 text-xs transition-all dark:bg-slate-800"
+              title={p.name}
             >
-              <span className="font-medium text-slate-900 dark:text-white">
+              <span className="font-medium text-slate-900 dark:text-white truncate">
                 Seat {p.seatNumber! + 1}: {p.name}
               </span>
             </div>
