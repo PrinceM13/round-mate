@@ -1,0 +1,84 @@
+import type { Participant, Table } from "@/types";
+
+/**
+ * Auto-assign participants to tables with balanced distribution
+ */
+export function autoAssignParticipants(
+  participants: Participant[],
+  seatsPerTable: number
+): { participants: Participant[]; tables: Table[] } {
+  // Shuffle participants randomly
+  const shuffled = [...participants].sort(() => Math.random() - 0.5);
+
+  // Calculate number of tables needed
+  const numTables = Math.ceil(shuffled.length / seatsPerTable);
+
+  // Initialize tables
+  const tables: Table[] = Array.from({ length: numTables }, (_, i) => ({
+    id: i,
+    seatsPerTable,
+    participants: [],
+  }));
+
+  // Assign participants to tables
+  const assignedParticipants: Participant[] = shuffled.map((p, index) => {
+    const tableId = Math.floor(index / seatsPerTable);
+    const seatNumber = index % seatsPerTable;
+    return {
+      ...p,
+      tableId,
+      seatNumber,
+    };
+  });
+
+  // Populate table participants
+  assignedParticipants.forEach((p) => {
+    if (p.tableId !== null) {
+      tables[p.tableId].participants.push(p);
+    }
+  });
+
+  return { participants: assignedParticipants, tables };
+}
+
+/**
+ * Swap two participants
+ */
+export function swapParticipants(
+  participants: Participant[],
+  participant1Id: string,
+  participant2Id: string
+): Participant[] {
+  const p1 = participants.find((p) => p.id === participant1Id);
+  const p2 = participants.find((p) => p.id === participant2Id);
+
+  if (!p1 || !p2) return participants;
+
+  const updated = participants.map((p) => {
+    if (p.id === participant1Id) {
+      return { ...p, tableId: p2.tableId, seatNumber: p2.seatNumber };
+    }
+    if (p.id === participant2Id) {
+      return { ...p, tableId: p1.tableId, seatNumber: p1.seatNumber };
+    }
+    return p;
+  });
+
+  return updated;
+}
+
+/**
+ * Generate tables from participants
+ */
+export function generateTables(
+  participants: Participant[],
+  seatsPerTable: number
+): Table[] {
+  const numTables = Math.ceil(participants.length / seatsPerTable);
+
+  return Array.from({ length: numTables }, (_, tableId) => ({
+    id: tableId,
+    seatsPerTable,
+    participants: participants.filter((p) => p.tableId === tableId),
+  }));
+}
