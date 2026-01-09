@@ -99,21 +99,30 @@ export function RoundTable({
                     onSeatClick?.(tableId, seatNumber, participant?.id)
                   }
                 />
-                {participant && <title>{participant.name}</title>}
+                {participant && (
+                  <title>{participant.name}</title>
+                )}
 
                 {/* Seat content */}
                 {participant ? (
-                  <text
-                    x={x}
-                    y={y}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    className="pointer-events-none text-xs font-bold text-slate-900 select-none"
-                    fill="currentColor"
-                    style={{ userSelect: "none" }}
-                  >
-                    {participant.name.split(" ").map((n) => n[0]).join("")}
-                  </text>
+                  <g>
+                    <text
+                      x={x}
+                      y={y}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      className="pointer-events-none text-xs font-bold text-slate-900 select-none"
+                      fill="currentColor"
+                      style={{ userSelect: "none" }}
+                    >
+                      {participant.name
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")}
+                    </text>
+                    {/* Custom tooltip with better styling */}
+                    <title>{participant.name}</title>
+                  </g>
                 ) : (
                   <text
                     x={x}
@@ -144,7 +153,7 @@ export function RoundTable({
               className="flex cursor-default items-center justify-between gap-2 rounded bg-white p-2 text-xs transition-all dark:bg-slate-800"
               title={p.name}
             >
-              <span className="font-medium text-slate-900 dark:text-white truncate">
+              <span className="truncate font-medium text-slate-900 dark:text-white">
                 Seat {p.seatNumber! + 1}: {p.name}
               </span>
             </div>

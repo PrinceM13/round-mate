@@ -111,8 +111,9 @@ export function AssignmentStep({
         link.click();
       } catch (error) {
         console.error("Export error:", error);
+        // Show user-friendly error message with alternatives
         alert(
-          "Failed to export image. This may be due to SVG rendering. Try taking a screenshot instead."
+          "Export failed. This may be due to SVG rendering in your browser. You can:\n\n1. Try refreshing the page and exporting again\n2. Use your browser's screenshot tool (Cmd+Shift+4 on Mac, Windows+Shift+S on Windows)\n3. Export as Excel instead (lower button)"
         );
       }
     }
@@ -152,7 +153,8 @@ export function AssignmentStep({
             <strong>Click to Swap:</strong>
           </p>
           <p className="mt-2 text-sm text-slate-700 dark:text-slate-300">
-            Click 2 seats on the table to exchange them. First seat will be highlighted in pink.
+            Click 2 seats on the table to exchange them. First seat will be
+            highlighted in pink.
           </p>
         </div>
       </div>
@@ -160,19 +162,25 @@ export function AssignmentStep({
       {/* Click-to-swap indicator - overlay at bottom */}
       {selectedSeat && (
         <div
-          className="fixed bottom-20 left-1/2 z-40 text-white rounded-lg px-6 py-3 shadow-lg whitespace-nowrap text-sm font-semibold"
+          className="fixed bottom-20 left-1/2 z-40 rounded-lg px-6 py-3 text-sm font-semibold whitespace-nowrap text-white shadow-lg"
           style={{
             transform: "translateX(-50%)",
             backgroundColor: "rgba(236, 72, 153, 0.9)",
           }}
         >
-          🎯 Selected: Table {selectedSeat.tableId + 1}, Seat {selectedSeat.seatNumber + 1}
+          🎯 Selected: Table {selectedSeat.tableId + 1}, Seat{" "}
+          {selectedSeat.seatNumber + 1}
           {selectedSeat.participantId && (
             <span className="ml-2 font-normal">
-              ({participants.find((p) => p.id === selectedSeat.participantId)?.name})
+              (
+              {
+                participants.find((p) => p.id === selectedSeat.participantId)
+                  ?.name
+              }
+              )
             </span>
           )}
-          <p className="text-xs font-normal opacity-90 mt-1">
+          <p className="mt-1 text-xs font-normal opacity-90">
             Click another seat to swap
           </p>
         </div>
