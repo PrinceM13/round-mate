@@ -5,6 +5,7 @@
 Your Round Mate seating assignment application is fully functional with all requested features implemented:
 
 ### ✅ Core Features
+
 - **Excel Import**: Download template, bulk upload participant names
 - **Manual Entry**: Add/edit/delete participants one-by-one
 - **Auto-Assignment**: Intelligent random distribution across tables
@@ -69,6 +70,7 @@ round-mate/
 ## 💾 Dependencies
 
 ### Production
+
 - `next`: 16.1.1 - React framework
 - `react`: 19.2.3 - UI library
 - `react-dom`: 19.2.3 - DOM rendering
@@ -76,6 +78,7 @@ round-mate/
 - `html2canvas`: 1.4.1 - Image export
 
 ### Development
+
 - `tailwindcss`: 4 - Styling
 - `typescript`: 5 - Type safety
 - `prettier`: 3 - Code formatting
@@ -87,18 +90,21 @@ round-mate/
 ## 🎯 How It Works
 
 ### 1. **Input Step**
+
 ```
 User uploads Excel or manually adds names
 Set seats per table (default: 10)
 ```
 
 ### 2. **Auto-Assignment**
+
 ```
 Algorithm: Shuffle participants → Distribute across tables
 Example: 48 people, 10 seats/table = 5 tables (4×10 + 1×8)
 ```
 
 ### 3. **Assignment Step**
+
 ```
 Visual display of all tables with participants
 Drag-and-drop to swap seats
@@ -106,12 +112,14 @@ Real-time updates
 ```
 
 ### 4. **Export**
+
 ```
 PNG: High-res screenshot for printing
 Excel: Detailed assignment spreadsheet
 ```
 
 ### 5. **Summary**
+
 ```
 Statistics dashboard
 Complete table breakdown
@@ -132,14 +140,14 @@ Option to create new assignment
 
 ## 🔧 Key Technologies
 
-| Technology | Purpose | Version |
-|-----------|---------|---------|
-| Next.js | Framework | 16.1.1 |
-| React | UI Library | 19.2.3 |
-| TypeScript | Type Safety | ^5 |
-| Tailwind CSS | Styling | ^4 |
-| XLSX | Excel | 0.18.5 |
-| html2canvas | Image Export | 1.4.1 |
+| Technology   | Purpose      | Version |
+| ------------ | ------------ | ------- |
+| Next.js      | Framework    | 16.1.1  |
+| React        | UI Library   | 19.2.3  |
+| TypeScript   | Type Safety  | ^5      |
+| Tailwind CSS | Styling      | ^4      |
+| XLSX         | Excel        | 0.18.5  |
+| html2canvas  | Image Export | 1.4.1   |
 
 ---
 
@@ -234,15 +242,19 @@ fde9ba8 - Initial commit from Create Next App
 ## 🆘 Troubleshooting
 
 ### Issue: Excel file won't upload
+
 **Solution**: Ensure file is .xlsx or .csv format with names in first column
 
 ### Issue: Drag-and-drop not working
+
 **Solution**: Use the participant list items (more reliable than SVG circles)
 
 ### Issue: Export button not working
+
 **Solution**: Check browser pop-up settings and ensure sufficient RAM
 
 ### Issue: Slow performance with 1000+ participants
+
 **Solution**: Split into multiple smaller groups or use pagination
 
 ---
@@ -275,11 +287,11 @@ You now have a **fully functional, production-ready seating assignment applicati
 ✅ Multiple export formats  
 ✅ Professional styling  
 ✅ Complete documentation  
-✅ Clean, maintainable code  
+✅ Clean, maintainable code
 
 **Ready to deploy! 🚀**
 
 ---
 
-*Created: January 10, 2026*  
-*Last Updated: January 10, 2026*
+_Created: January 10, 2026_  
+_Last Updated: January 10, 2026_

@@ -2,46 +2,55 @@
 
 ## ✅ Completed Features
 
-### 1. **Participant Input Management** 
+### 1. **Participant Input Management**
+
 - **Excel Upload**: Users can download a template and bulk import participant names
 - **Manual Entry**: Add participants one-by-one with add/edit/delete functionality
 - **Customizable Seats**: Set seats per table (default: 10)
 - **Live List**: View all added participants with inline editing
 
 ### 2. **Auto-Assignment Algorithm**
+
 - Random balanced distribution of participants across tables
 - Dynamic table calculation based on participant count and seats per table
 - Example: 48 participants with 10 seats/table → 5 tables (4 full + 1 partial)
 
 ### 3. **Round Table Visualization**
+
 - **Circular SVG Layout**: Beautiful round table representation
 - **Seat Numbers**: Visual seat positions numbered from 1-N
 - **Participant Names**: Names displayed on their assigned seats
 - **Empty Seats**: Show as numbered circles for easy overview
 
 ### 4. **Drag-and-Drop Swapping**
+
 - **Within Table**: Swap participants within the same table
 - **Across Tables**: Move participants between different tables
 - **Easy Interface**: Drag from list or directly click on participants
 - **Visual Feedback**: Highlight dragging state during swap
 
 ### 5. **Export Functionality**
+
 #### PNG Image Export
+
 - High-resolution screenshot of table layout (2x scale)
 - Perfect for printing or sharing
 - Shows all tables with participant names
 
 #### Excel Export
+
 - Detailed assignment spreadsheet
 - Columns: Table Number | Seat Number | Participant Name
 - Sorted by table and seat for easy reference
 
 ### 6. **Three-Step Workflow**
+
 1. **Input Step**: Add participants, set seats per table
 2. **Assignment Step**: Review and manually adjust seating
 3. **Summary Step**: View statistics and export results
 
 ### 7. **Statistics Dashboard** (Summary)
+
 - Total tables created
 - Total participants assigned
 - Filled seats vs empty seats
@@ -97,20 +106,22 @@ src/
 ## 📊 Key Data Structures
 
 ### Participant
+
 ```typescript
 interface Participant {
-  id: string;              // Unique identifier
-  name: string;            // Participant name
-  tableId: number | null;  // Assigned table
+  id: string; // Unique identifier
+  name: string; // Participant name
+  tableId: number | null; // Assigned table
   seatNumber: number | null; // Seat position
 }
 ```
 
 ### Table
+
 ```typescript
 interface Table {
-  id: number;              // Table number (0-indexed)
-  seatsPerTable: number;   // Max capacity
+  id: number; // Table number (0-indexed)
+  seatsPerTable: number; // Max capacity
   participants: Participant[]; // Assigned participants
 }
 ```
