@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import type { Participant } from "@/types";
 
 interface RoundTableProps {
@@ -14,6 +15,13 @@ interface RoundTableProps {
   ) => void;
 }
 
+interface TooltipState {
+  visible: boolean;
+  x: number;
+  y: number;
+  name: string;
+}
+
 export function RoundTable({
   tableId,
   participants,
@@ -21,6 +29,13 @@ export function RoundTable({
   selectedSeat,
   onSeatClick,
 }: RoundTableProps) {
+  const [tooltip, setTooltip] = useState<TooltipState>({
+    visible: false,
+    x: 0,
+    y: 0,
+    name: "",
+  });
+
   // Setup seats with participant data
   const seats = Array.from({ length: seatsPerTable }, (_, i) => {
     const participant = participants.find((p) => p.seatNumber === i);
@@ -98,10 +113,21 @@ export function RoundTable({
                   onClick={() =>
                     onSeatClick?.(tableId, seatNumber, participant?.id)
                   }
+                  onMouseEnter={(e) => {
+                    if (participant) {
+                      const rect = (e.target as SVGCircleElement).getBoundingClientRect();
+                      setTooltip({
+                        visible: true,
+                        x: rect.left + rect.width / 2,
+                        y: rect.top - 10,
+                        name: participant.name,
+                      });
+                    }
+                  }}
+                  onMouseLeave={() =>
+                    setTooltip({ ...tooltip, visible: false })
+                  }
                 />
-                {participant && (
-                  <title>{participant.name}</title>
-                )}
 
                 {/* Seat content */}
                 {participant ? (
@@ -140,6 +166,24 @@ export function RoundTable({
           })}
         </svg>
       </div>
+
+      {/* Custom fast tooltip */}
+      {tooltip.visible && (
+        <div
+          className="fixed z-50 bg-slate-900 text-white px-3 py-2 rounded shadow-lg text-xs font-medium whitespace-nowrap pointer-events-none"
+          style={{
+            left: tooltip.x,
+            top: tooltip.y,
+            transform: "translate(-50%, -100%)",
+          }}
+        >
+          {tooltip.name}
+          <div
+            className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-slate-900"
+            style={{ width: 0, height: 0 }}
+          />
+        </div>
+      )}
 
       {/* Participant list for this table */}
       <div className="rounded-lg bg-slate-50 p-3 dark:bg-slate-900">

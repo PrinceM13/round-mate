@@ -83,39 +83,94 @@ export function AssignmentStep({
   };
 
   const handleExportImage = async () => {
-    if (tablesRef.current) {
-      try {
-        // Hide the fixed position selector during export
-        const selector = document.querySelector(
-          ".fixed.bottom-20"
-        ) as HTMLElement;
-        if (selector) selector.style.display = "none";
+    if (!participants.length) {
+      alert("No data to export");
+      return;
+    }
 
-        const canvas = await html2canvas(tablesRef.current, {
+    try {
+      // Create a simple HTML table for export (avoids SVG rendering issues)
+      const htmlContent = `
+        <html>
+          <head>
+            <style>
+              body { font-family: Arial, sans-serif; padding: 20px; background: white; }
+              h1 { text-align: center; color: #333; }
+              .table-container { margin: 30px 0; page-break-inside: avoid; }
+              .table-title { font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; color: #333; }
+              table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
+              th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+              th { background-color: #f0f0f0; font-weight: bold; color: #333; }
+              tr:nth-child(even) { background-color: #f9f9f9; }
+              .seat-number { font-weight: bold; color: #6366f1; width: 60px; }
+              @media print {
+                body { margin: 0; padding: 10px; }
+                .table-container { page-break-inside: avoid; }
+              }
+            </style>
+          </head>
+          <body>
+            <h1>Round Mate - Table Assignments</h1>
+            <p style="text-align: center; color: #666;">Generated on ${new Date().toLocaleString()}</p>
+            ${tables
+              .map(
+                (table) => `
+              <div class="table-container">
+                <div class="table-title">Table ${table.id + 1}</div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th class="seat-number">Seat</th>
+                      <th>Participant Name</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${Array.from({ length: seatsPerTable })
+                      .map((_, i) => {
+                        const participant = participants.find(
+                          (p) => p.tableId === table.id && p.seatNumber === i
+                        );
+                        return `
+                      <tr>
+                        <td class="seat-number">${i + 1}</td>
+                        <td>${participant?.name || "-"}</td>
+                      </tr>
+                    `;
+                      })
+                      .join("")}
+                  </tbody>
+                </table>
+              </div>
+            `
+              )
+              .join("")}
+          </body>
+        </html>
+      `;
+
+      const canvas = await html2canvas(
+        new DOMParser().parseFromString(htmlContent, "text/html").body,
+        {
           scale: 2,
           backgroundColor: "#ffffff",
           useCORS: true,
           allowTaint: true,
           logging: false,
-          ignoreElements: (element) => {
-            return element.classList.contains("no-export");
-          },
-        });
+          width: 800,
+          windowWidth: 800,
+        }
+      );
 
-        // Show the selector again
-        if (selector) selector.style.display = "";
-
-        const link = document.createElement("a");
-        link.href = canvas.toDataURL("image/png");
-        link.download = "round-mate-assignment.png";
-        link.click();
-      } catch (error) {
-        console.error("Export error:", error);
-        // Show user-friendly error message with alternatives
-        alert(
-          "Export failed. This may be due to SVG rendering in your browser. You can:\n\n1. Try refreshing the page and exporting again\n2. Use your browser's screenshot tool (Cmd+Shift+4 on Mac, Windows+Shift+S on Windows)\n3. Export as Excel instead (lower button)"
-        );
-      }
+      const link = document.createElement("a");
+      link.href = canvas.toDataURL("image/png");
+      link.download = "round-mate-assignment.png";
+      link.click();
+    } catch (error) {
+      console.error("Export error:", error);
+      // Show user-friendly error message with alternatives
+      alert(
+        "Export failed. You can:\n\n1. Export as Excel instead (more reliable)\n2. Use your browser's screenshot tool (Cmd+Shift+4 on Mac, Windows+Shift+S on Windows)\n3. Refresh the page and try again"
+      );
     }
   };
 
