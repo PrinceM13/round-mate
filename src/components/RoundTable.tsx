@@ -115,7 +115,9 @@ export function RoundTable({
                   }
                   onMouseEnter={(e) => {
                     if (participant) {
-                      const rect = (e.target as SVGCircleElement).getBoundingClientRect();
+                      const rect = (
+                        e.target as SVGCircleElement
+                      ).getBoundingClientRect();
                       setTooltip({
                         visible: true,
                         x: rect.left + rect.width / 2,
@@ -170,17 +172,25 @@ export function RoundTable({
       {/* Custom fast tooltip */}
       {tooltip.visible && (
         <div
-          className="fixed z-50 bg-slate-900 text-white px-3 py-2 rounded shadow-lg text-xs font-medium whitespace-nowrap pointer-events-none"
+          className="pointer-events-none fixed z-50 rounded px-3 py-2 text-xs font-semibold whitespace-nowrap shadow-lg"
           style={{
             left: tooltip.x,
             top: tooltip.y,
             transform: "translate(-50%, -100%)",
+            backgroundColor: "#6366f1",
+            color: "#ffffff",
+            border: "1px solid #4f46e5",
           }}
         >
           {tooltip.name}
           <div
-            className="absolute left-1/2 top-full -translate-x-1/2 border-4 border-transparent border-t-slate-900"
-            style={{ width: 0, height: 0 }}
+            className="absolute left-1/2 top-full border-4 border-transparent"
+            style={{
+              borderTopColor: "#6366f1",
+              width: 0,
+              height: 0,
+              marginLeft: "-4px",
+            }}
           />
         </div>
       )}

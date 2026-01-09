@@ -89,77 +89,121 @@ export function AssignmentStep({
     }
 
     try {
-      // Create a simple HTML table for export (avoids SVG rendering issues)
-      const htmlContent = `
-        <html>
-          <head>
-            <style>
-              body { font-family: Arial, sans-serif; padding: 20px; background: white; }
-              h1 { text-align: center; color: #333; }
-              .table-container { margin: 30px 0; page-break-inside: avoid; }
-              .table-title { font-size: 18px; font-weight: bold; margin: 20px 0 10px 0; color: #333; }
-              table { border-collapse: collapse; width: 100%; margin-bottom: 20px; }
-              th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-              th { background-color: #f0f0f0; font-weight: bold; color: #333; }
-              tr:nth-child(even) { background-color: #f9f9f9; }
-              .seat-number { font-weight: bold; color: #6366f1; width: 60px; }
-              @media print {
-                body { margin: 0; padding: 10px; }
-                .table-container { page-break-inside: avoid; }
-              }
-            </style>
-          </head>
-          <body>
-            <h1>Round Mate - Table Assignments</h1>
-            <p style="text-align: center; color: #666;">Generated on ${new Date().toLocaleString()}</p>
-            ${tables
-              .map(
-                (table) => `
-              <div class="table-container">
-                <div class="table-title">Table ${table.id + 1}</div>
-                <table>
-                  <thead>
-                    <tr>
-                      <th class="seat-number">Seat</th>
-                      <th>Participant Name</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    ${Array.from({ length: seatsPerTable })
-                      .map((_, i) => {
-                        const participant = participants.find(
-                          (p) => p.tableId === table.id && p.seatNumber === i
-                        );
-                        return `
-                      <tr>
-                        <td class="seat-number">${i + 1}</td>
-                        <td>${participant?.name || "-"}</td>
-                      </tr>
-                    `;
-                      })
-                      .join("")}
-                  </tbody>
-                </table>
-              </div>
-            `
-              )
-              .join("")}
-          </body>
-        </html>
-      `;
+      // Create a clean screenshot by rendering just the table data
+      const screenshotDiv = document.createElement("div");
+      screenshotDiv.style.position = "fixed";
+      screenshotDiv.style.left = "-9999px";
+      screenshotDiv.style.top = "0";
+      screenshotDiv.style.width = "900px";
+      screenshotDiv.style.background = "white";
+      screenshotDiv.style.padding = "40px";
+      screenshotDiv.style.fontFamily =
+        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
 
-      const canvas = await html2canvas(
-        new DOMParser().parseFromString(htmlContent, "text/html").body,
-        {
-          scale: 2,
-          backgroundColor: "#ffffff",
-          useCORS: true,
-          allowTaint: true,
-          logging: false,
-          width: 800,
-          windowWidth: 800,
-        }
-      );
+      // Create header
+      const header = document.createElement("h1");
+      header.textContent = "Round Mate - Table Assignments";
+      header.style.textAlign = "center";
+      header.style.color = "#1f2937";
+      header.style.marginBottom = "10px";
+      header.style.fontSize = "28px";
+      header.style.fontWeight = "bold";
+      screenshotDiv.appendChild(header);
+
+      const dateInfo = document.createElement("p");
+      dateInfo.textContent = `Generated on ${new Date().toLocaleString()}`;
+      dateInfo.style.textAlign = "center";
+      dateInfo.style.color = "#6b7280";
+      dateInfo.style.marginBottom = "30px";
+      dateInfo.style.fontSize = "14px";
+      screenshotDiv.appendChild(dateInfo);
+
+      // Create tables for each seating arrangement
+      tables.forEach((table) => {
+        const tableContainer = document.createElement("div");
+        tableContainer.style.marginBottom = "30px";
+        tableContainer.style.pageBreakInside = "avoid";
+
+        const tableTitle = document.createElement("h2");
+        tableTitle.textContent = `Table ${table.id + 1}`;
+        tableTitle.style.fontSize = "18px";
+        tableTitle.style.fontWeight = "bold";
+        tableTitle.style.marginBottom = "12px";
+        tableTitle.style.color = "#1f2937";
+        tableContainer.appendChild(tableTitle);
+
+        const table_el = document.createElement("table");
+        table_el.style.width = "100%";
+        table_el.style.borderCollapse = "collapse";
+        table_el.style.marginBottom = "20px";
+
+        // Header
+        const thead = document.createElement("thead");
+        const headerRow = document.createElement("tr");
+        headerRow.style.backgroundColor = "#f3f4f6";
+        const seatHeader = document.createElement("th");
+        seatHeader.textContent = "Seat";
+        seatHeader.style.padding = "12px";
+        seatHeader.style.textAlign = "left";
+        seatHeader.style.border = "1px solid #d1d5db";
+        seatHeader.style.fontWeight = "bold";
+        seatHeader.style.color = "#1f2937";
+        const nameHeader = document.createElement("th");
+        nameHeader.textContent = "Participant Name";
+        nameHeader.style.padding = "12px";
+        nameHeader.style.textAlign = "left";
+        nameHeader.style.border = "1px solid #d1d5db";
+        nameHeader.style.fontWeight = "bold";
+        nameHeader.style.color = "#1f2937";
+        headerRow.appendChild(seatHeader);
+        headerRow.appendChild(nameHeader);
+        thead.appendChild(headerRow);
+        table_el.appendChild(thead);
+
+        // Body
+        const tbody = document.createElement("tbody");
+        Array.from({ length: seatsPerTable }).forEach((_, i) => {
+          const participant = participants.find(
+            (p) => p.tableId === table.id && p.seatNumber === i
+          );
+          const row = document.createElement("tr");
+          row.style.backgroundColor = i % 2 === 0 ? "#ffffff" : "#f9fafb";
+
+          const seatCell = document.createElement("td");
+          seatCell.textContent = String(i + 1);
+          seatCell.style.padding = "12px";
+          seatCell.style.border = "1px solid #d1d5db";
+          seatCell.style.color = "#6366f1";
+          seatCell.style.fontWeight = "bold";
+
+          const nameCell = document.createElement("td");
+          nameCell.textContent = participant?.name || "-";
+          nameCell.style.padding = "12px";
+          nameCell.style.border = "1px solid #d1d5db";
+          nameCell.style.color = "#1f2937";
+
+          row.appendChild(seatCell);
+          row.appendChild(nameCell);
+          tbody.appendChild(row);
+        });
+        table_el.appendChild(tbody);
+        tableContainer.appendChild(table_el);
+        screenshotDiv.appendChild(tableContainer);
+      });
+
+      document.body.appendChild(screenshotDiv);
+
+      const canvas = await html2canvas(screenshotDiv, {
+        scale: 2,
+        backgroundColor: "#ffffff",
+        useCORS: true,
+        allowTaint: true,
+        logging: false,
+        windowWidth: 900,
+        windowHeight: document.body.scrollHeight,
+      });
+
+      document.body.removeChild(screenshotDiv);
 
       const link = document.createElement("a");
       link.href = canvas.toDataURL("image/png");
@@ -167,9 +211,8 @@ export function AssignmentStep({
       link.click();
     } catch (error) {
       console.error("Export error:", error);
-      // Show user-friendly error message with alternatives
       alert(
-        "Export failed. You can:\n\n1. Export as Excel instead (more reliable)\n2. Use your browser's screenshot tool (Cmd+Shift+4 on Mac, Windows+Shift+S on Windows)\n3. Refresh the page and try again"
+        "Export failed. You can:\n\n1. Export as Excel instead (more reliable)\n2. Use your browser's screenshot tool (Cmd+Shift+4 on Mac, Windows+Shift+S on Windows)"
       );
     }
   };
