@@ -99,23 +99,21 @@ export function RoundTable({
                     onSeatClick?.(tableId, seatNumber, participant?.id)
                   }
                 />
+                {participant && <title>{participant.name}</title>}
 
                 {/* Seat content */}
                 {participant ? (
-                  <g>
-                    <title>{participant.name}</title>
-                    <text
-                      x={x}
-                      y={y}
-                      textAnchor="middle"
-                      dominantBaseline="middle"
-                      className="pointer-events-none text-xs font-bold text-slate-900 select-none"
-                      fill="currentColor"
-                      style={{ userSelect: "none" }}
-                    >
-                      {participant.name.split(" ").map((n) => n[0]).join("")}
-                    </text>
-                  </g>
+                  <text
+                    x={x}
+                    y={y}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    className="pointer-events-none text-xs font-bold text-slate-900 select-none"
+                    fill="currentColor"
+                    style={{ userSelect: "none" }}
+                  >
+                    {participant.name.split(" ").map((n) => n[0]).join("")}
+                  </text>
                 ) : (
                   <text
                     x={x}

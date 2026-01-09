@@ -159,7 +159,13 @@ export function AssignmentStep({
 
       {/* Click-to-swap indicator - overlay at bottom */}
       {selectedSeat && (
-        <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-40 bg-secondary/90 text-white rounded-lg px-6 py-3 shadow-lg whitespace-nowrap text-sm font-semibold">
+        <div
+          className="fixed bottom-20 left-1/2 z-40 text-white rounded-lg px-6 py-3 shadow-lg whitespace-nowrap text-sm font-semibold"
+          style={{
+            transform: "translateX(-50%)",
+            backgroundColor: "rgba(236, 72, 153, 0.9)",
+          }}
+        >
           🎯 Selected: Table {selectedSeat.tableId + 1}, Seat {selectedSeat.seatNumber + 1}
           {selectedSeat.participantId && (
             <span className="ml-2 font-normal">
