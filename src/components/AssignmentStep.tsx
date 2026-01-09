@@ -29,6 +29,11 @@ export function AssignmentStep({
   const [draggedFromTableId, setDraggedFromTableId] = useState<number | null>(
     null
   );
+  const [selectedSeat, setSelectedSeat] = useState<{
+    tableId: number;
+    seatNumber: number;
+    participantId?: string;
+  } | null>(null);
   const tablesRef = useRef<HTMLDivElement>(null);
 
   const tables = generateTables(participants, seatsPerTable);
@@ -41,6 +46,56 @@ export function AssignmentStep({
   const handleDragEnd = () => {
     setDraggedParticipantId(null);
     setDraggedFromTableId(null);
+  };
+
+  const handleSeatClick = (
+    tableId: number,
+    seatNumber: number,
+    participantId?: string
+  ) => {
+    // If this seat is already selected, deselect it
+    if (
+      selectedSeat?.tableId === tableId &&
+      selectedSeat?.seatNumber === seatNumber
+    ) {
+      setSelectedSeat(null);
+      return;
+    }
+
+    // If no seat is selected yet, select this one
+    if (!selectedSeat) {
+      setSelectedSeat({ tableId, seatNumber, participantId });
+      return;
+    }
+
+    // If a seat is already selected, swap
+    const firstParticipant = participants.find(
+      (p) =>
+        p.tableId === selectedSeat.tableId &&
+        p.seatNumber === selectedSeat.seatNumber
+    );
+    const secondParticipant = participants.find(
+      (p) => p.tableId === tableId && p.seatNumber === seatNumber
+    );
+
+    if (firstParticipant && secondParticipant) {
+      // Swap two participants
+      const updated = swapParticipants(
+        participants,
+        firstParticipant.id,
+        secondParticipant.id
+      );
+      setParticipants(updated);
+    } else if (firstParticipant && !secondParticipant) {
+      // Move one participant to empty seat
+      setParticipants(
+        participants.map((p) =>
+          p.id === firstParticipant.id ? { ...p, tableId, seatNumber } : p
+        )
+      );
+    }
+
+    setSelectedSeat(null);
   };
 
   const handleDropOnSeat = (
@@ -128,12 +183,46 @@ export function AssignmentStep({
       </div>
 
       {/* Instructions */}
-      <div className="border-primary bg-primary/5 rounded-2xl border-l-4 p-6">
-        <p className="text-sm text-slate-700 dark:text-slate-300">
-          💡 <strong>Drag and drop</strong> participants to swap them between
-          tables and seats. You can move them across tables or within the same
-          table.
-        </p>
+      <div className="space-y-3">
+        <div className="border-primary bg-primary/5 rounded-2xl border-l-4 p-6">
+          <p className="text-sm text-slate-700 dark:text-slate-300">
+            <strong>Two ways to swap:</strong>
+          </p>
+          <ul className="mt-2 ml-4 space-y-1 text-sm text-slate-700 dark:text-slate-300">
+            <li>
+              ✨ <strong>Drag & Drop:</strong> Drag participant names to swap
+              positions
+            </li>
+            <li>
+              ✨ <strong>Click to Swap:</strong> Click 2 seats on the table to
+              exchange them
+            </li>
+          </ul>
+        </div>
+
+        {/* Click-to-swap indicator */}
+        {selectedSeat && (
+          <div className="border-secondary bg-secondary/5 rounded-2xl border-l-4 p-4">
+            <p className="text-sm font-semibold text-slate-900 dark:text-white">
+              🎯 First seat selected: Table {selectedSeat.tableId + 1}, Seat{" "}
+              {selectedSeat.seatNumber + 1}
+              {selectedSeat.participantId && (
+                <span className="ml-2 text-slate-600 dark:text-slate-400">
+                  (
+                  {
+                    participants.find(
+                      (p) => p.id === selectedSeat.participantId
+                    )?.name
+                  }
+                  )
+                </span>
+              )}
+            </p>
+            <p className="mt-2 text-xs text-slate-600 dark:text-slate-400">
+              Click another seat to swap, or click this seat again to cancel
+            </p>
+          </div>
+        )}
       </div>
 
       {/* Tables Display */}
@@ -155,6 +244,8 @@ export function AssignmentStep({
                   tableId={table.id}
                   participants={table.participants}
                   seatsPerTable={seatsPerTable}
+                  selectedSeat={selectedSeat}
+                  onSeatClick={handleSeatClick}
                   draggingParticipantId={draggedParticipantId}
                   onDragStart={(id) => handleDragStart(id, table.id)}
                   onDragEnd={handleDragEnd}

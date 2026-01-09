@@ -6,8 +6,12 @@ interface RoundTableProps {
   tableId: number;
   participants: Participant[];
   seatsPerTable: number;
-  onSeatClick?: (participantId: string) => void;
-  selectedParticipantId?: string | null;
+  selectedSeat?: { tableId: number; seatNumber: number } | null;
+  onSeatClick?: (
+    tableId: number,
+    seatNumber: number,
+    participantId?: string
+  ) => void;
   draggingParticipantId?: string | null;
   onDragStart?: (participantId: string, tableId: number) => void;
   onDrop?: (tableId: number, seatNumber: number) => void;
@@ -18,28 +22,38 @@ export function RoundTable({
   tableId,
   participants,
   seatsPerTable,
+  selectedSeat,
   onSeatClick,
-  selectedParticipantId,
   draggingParticipantId,
   onDragStart,
   onDrop,
   onDragEnd,
 }: RoundTableProps) {
+  // Setup seats with participant data
   const seats = Array.from({ length: seatsPerTable }, (_, i) => {
     const participant = participants.find((p) => p.seatNumber === i);
     return { seatNumber: i, participant };
   });
 
-  // Calculate positions for circular layout
-  const radius = 120;
-  const centerX = 150;
-  const centerY = 150;
+  // Adaptive SVG sizing based on seats per table
+  const svgSize = Math.max(280, Math.min(400, seatsPerTable * 30));
+  const radius = svgSize * 0.25;
+  const centerX = svgSize / 2;
+  const centerY = svgSize / 2;
 
+  // Calculate positions for circular layout
   const getSeatPosition = (seatNumber: number) => {
     const angle = (seatNumber / seatsPerTable) * 2 * Math.PI - Math.PI / 2;
     const x = centerX + radius * Math.cos(angle);
     const y = centerY + radius * Math.sin(angle);
     return { x, y };
+  };
+
+  const isSelected = (seatNumber: number) => {
+    return (
+      selectedSeat?.tableId === tableId &&
+      selectedSeat?.seatNumber === seatNumber
+    );
   };
 
   return (
@@ -48,21 +62,26 @@ export function RoundTable({
         Table {tableId + 1}
       </h3>
 
-      {/* Circular Table with drag support */}
+      {/* Circular Table */}
       <div
-        className="flex justify-center"
+        className="flex justify-center overflow-visible"
         onDragOver={(e) => e.preventDefault()}
         onDrop={(e) => {
           e.preventDefault();
           e.stopPropagation();
         }}
       >
-        <svg width="300" height="300" className="drop-shadow-lg">
+        <svg
+          width={svgSize}
+          height={svgSize}
+          viewBox={`0 0 ${svgSize} ${svgSize}`}
+          className="drop-shadow-lg"
+        >
           {/* Table circle */}
           <circle
             cx={centerX}
             cy={centerY}
-            r={100}
+            r={radius - 20}
             fill="none"
             stroke="currentColor"
             strokeWidth="2"
@@ -72,7 +91,7 @@ export function RoundTable({
           {/* Seats */}
           {seats.map(({ seatNumber, participant }) => {
             const { x, y } = getSeatPosition(seatNumber);
-            const isSelected = selectedParticipantId === participant?.id;
+            const seatIsSelected = isSelected(seatNumber);
             const isDragging = draggingParticipantId === participant?.id;
 
             return (
@@ -81,20 +100,22 @@ export function RoundTable({
                 <circle
                   cx={x}
                   cy={y}
-                  r={participant ? 28 : 22}
+                  r={participant ? 22 : 18}
                   fill={
                     isDragging ? "#6366f1" : participant ? "#fff" : "#f1f5f9"
                   }
                   stroke={
-                    isSelected ? "#6366f1" : participant ? "#94a3b8" : "#cbd5e1"
+                    seatIsSelected
+                      ? "#ec4899"
+                      : participant
+                        ? "#94a3b8"
+                        : "#cbd5e1"
                   }
-                  strokeWidth={isSelected ? "3" : "2"}
+                  strokeWidth={seatIsSelected ? "3" : "2"}
                   className="cursor-pointer transition-all hover:opacity-80"
-                  onClick={() => {
-                    if (participant) {
-                      onSeatClick?.(participant.id);
-                    }
-                  }}
+                  onClick={() =>
+                    onSeatClick?.(tableId, seatNumber, participant?.id)
+                  }
                   onDragOver={(e) => e.preventDefault()}
                   onDrop={(e) => {
                     e.preventDefault();
