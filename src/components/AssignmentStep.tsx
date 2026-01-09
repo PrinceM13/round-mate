@@ -143,14 +143,17 @@ export function AssignmentStep({
         const canvas = await html2canvas(tablesRef.current, {
           scale: 2,
           backgroundColor: "#ffffff",
+          logging: false,
+          useCORS: true,
+          allowTaint: true,
         });
         const link = document.createElement("a");
         link.href = canvas.toDataURL("image/png");
         link.download = "round-mate-assignment.png";
         link.click();
       } catch (error) {
-        alert("Failed to export image");
-        console.error(error);
+        console.error("Export error:", error);
+        alert("Failed to export image. Please try again.");
       }
     }
   };

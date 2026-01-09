@@ -116,7 +116,15 @@ export function RoundTable({
                   onClick={() =>
                     onSeatClick?.(tableId, seatNumber, participant?.id)
                   }
-                  onDragOver={(e) => e.preventDefault()}
+                  onMouseDown={(e) => {
+                    if (participant && e.buttons === 1) {
+                      onDragStart?.(participant.id, tableId);
+                    }
+                  }}
+                  onDragOver={(e) => {
+                    e.preventDefault();
+                    e.dataTransfer!.dropEffect = "move";
+                  }}
                   onDrop={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
