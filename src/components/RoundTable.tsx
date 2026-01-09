@@ -12,10 +12,6 @@ interface RoundTableProps {
     seatNumber: number,
     participantId?: string
   ) => void;
-  draggingParticipantId?: string | null;
-  onDragStart?: (participantId: string, tableId: number) => void;
-  onDrop?: (tableId: number, seatNumber: number) => void;
-  onDragEnd?: () => void;
 }
 
 export function RoundTable({
@@ -24,10 +20,6 @@ export function RoundTable({
   seatsPerTable,
   selectedSeat,
   onSeatClick,
-  draggingParticipantId,
-  onDragStart,
-  onDrop,
-  onDragEnd,
 }: RoundTableProps) {
   // Setup seats with participant data
   const seats = Array.from({ length: seatsPerTable }, (_, i) => {
@@ -63,14 +55,7 @@ export function RoundTable({
       </h3>
 
       {/* Circular Table */}
-      <div
-        className="flex justify-center overflow-visible"
-        onDragOver={(e) => e.preventDefault()}
-        onDrop={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-        }}
-      >
+      <div className="flex justify-center overflow-visible">
         <svg
           width={svgSize}
           height={svgSize}
@@ -92,7 +77,6 @@ export function RoundTable({
           {seats.map(({ seatNumber, participant }) => {
             const { x, y } = getSeatPosition(seatNumber);
             const seatIsSelected = isSelected(seatNumber);
-            const isDragging = draggingParticipantId === participant?.id;
 
             return (
               <g key={seatNumber}>
@@ -101,9 +85,7 @@ export function RoundTable({
                   cx={x}
                   cy={y}
                   r={participant ? 22 : 18}
-                  fill={
-                    isDragging ? "#6366f1" : participant ? "#fff" : "#f1f5f9"
-                  }
+                  fill={participant ? "#fff" : "#f1f5f9"}
                   stroke={
                     seatIsSelected
                       ? "#ec4899"
@@ -116,20 +98,6 @@ export function RoundTable({
                   onClick={() =>
                     onSeatClick?.(tableId, seatNumber, participant?.id)
                   }
-                  onMouseDown={(e) => {
-                    if (participant && e.buttons === 1) {
-                      onDragStart?.(participant.id, tableId);
-                    }
-                  }}
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    e.dataTransfer!.dropEffect = "move";
-                  }}
-                  onDrop={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
-                    onDrop?.(tableId, seatNumber);
-                  }}
                 />
 
                 {/* Seat content */}
@@ -172,10 +140,7 @@ export function RoundTable({
           {participants.map((p) => (
             <div
               key={p.id}
-              draggable
-              onDragStart={() => onDragStart?.(p.id, tableId)}
-              onDragEnd={onDragEnd}
-              className="flex cursor-grab items-center justify-between gap-2 rounded bg-white p-2 text-xs transition-all active:cursor-grabbing dark:bg-slate-800"
+              className="flex cursor-default items-center justify-between gap-2 rounded bg-white p-2 text-xs transition-all dark:bg-slate-800"
             >
               <span className="font-medium text-slate-900 dark:text-white">
                 Seat {p.seatNumber! + 1}: {p.name}

@@ -23,12 +23,6 @@ export function AssignmentStep({
   onBack,
 }: AssignmentStepProps) {
   const [participants, setParticipants] = useState(initialParticipants);
-  const [draggedParticipantId, setDraggedParticipantId] = useState<
-    string | null
-  >(null);
-  const [draggedFromTableId, setDraggedFromTableId] = useState<number | null>(
-    null
-  );
   const [selectedSeat, setSelectedSeat] = useState<{
     tableId: number;
     seatNumber: number;
@@ -37,16 +31,6 @@ export function AssignmentStep({
   const tablesRef = useRef<HTMLDivElement>(null);
 
   const tables = generateTables(participants, seatsPerTable);
-
-  const handleDragStart = (participantId: string, tableId: number) => {
-    setDraggedParticipantId(participantId);
-    setDraggedFromTableId(tableId);
-  };
-
-  const handleDragEnd = () => {
-    setDraggedParticipantId(null);
-    setDraggedFromTableId(null);
-  };
 
   const handleSeatClick = (
     tableId: number,
@@ -98,62 +82,29 @@ export function AssignmentStep({
     setSelectedSeat(null);
   };
 
-  const handleDropOnSeat = (
-    targetTableId: number,
-    targetSeatNumber: number
-  ) => {
-    if (!draggedParticipantId || draggedFromTableId === null) {
-      return;
-    }
-
-    const draggedParticipant = participants.find(
-      (p) => p.id === draggedParticipantId
-    );
-    const targetParticipant = participants.find(
-      (p) => p.tableId === targetTableId && p.seatNumber === targetSeatNumber
-    );
-
-    if (!draggedParticipant) return;
-
-    // If dropping on empty seat
-    if (!targetParticipant) {
-      setParticipants(
-        participants.map((p) =>
-          p.id === draggedParticipantId
-            ? { ...p, tableId: targetTableId, seatNumber: targetSeatNumber }
-            : p
-        )
-      );
-    } else {
-      // Swap with existing participant
-      const updated = swapParticipants(
-        participants,
-        draggedParticipantId,
-        targetParticipant.id
-      );
-      setParticipants(updated);
-    }
-
-    handleDragEnd();
-  };
-
   const handleExportImage = async () => {
     if (tablesRef.current) {
       try {
         const canvas = await html2canvas(tablesRef.current, {
           scale: 2,
           backgroundColor: "#ffffff",
-          logging: false,
           useCORS: true,
           allowTaint: true,
+          logging: true,
+          ignoreElements: (element) => {
+            return element.classList.contains("no-export");
+          },
         });
+
         const link = document.createElement("a");
         link.href = canvas.toDataURL("image/png");
         link.download = "round-mate-assignment.png";
         link.click();
       } catch (error) {
         console.error("Export error:", error);
-        alert("Failed to export image. Please try again.");
+        alert(
+          "Failed to export image. This may be due to SVG rendering. Try taking a screenshot instead."
+        );
       }
     }
   };
@@ -192,10 +143,6 @@ export function AssignmentStep({
             <strong>Two ways to swap:</strong>
           </p>
           <ul className="mt-2 ml-4 space-y-1 text-sm text-slate-700 dark:text-slate-300">
-            <li>
-              ✨ <strong>Drag & Drop:</strong> Drag participant names to swap
-              positions
-            </li>
             <li>
               ✨ <strong>Click to Swap:</strong> Click 2 seats on the table to
               exchange them
@@ -249,12 +196,6 @@ export function AssignmentStep({
                   seatsPerTable={seatsPerTable}
                   selectedSeat={selectedSeat}
                   onSeatClick={handleSeatClick}
-                  draggingParticipantId={draggedParticipantId}
-                  onDragStart={(id) => handleDragStart(id, table.id)}
-                  onDragEnd={handleDragEnd}
-                  onDrop={(seatNumber) =>
-                    handleDropOnSeat(table.id, seatNumber)
-                  }
                 />
               </div>
             ))}
