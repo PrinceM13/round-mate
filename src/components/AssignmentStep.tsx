@@ -88,122 +88,28 @@ export function AssignmentStep({
       return;
     }
 
+    if (!tablesRef.current) {
+      alert("Unable to export at this time");
+      return;
+    }
+
     try {
-      // Create a clean screenshot by rendering just the table data
-      const screenshotDiv = document.createElement("div");
-      screenshotDiv.style.position = "fixed";
-      screenshotDiv.style.left = "-9999px";
-      screenshotDiv.style.top = "0";
-      screenshotDiv.style.width = "900px";
-      screenshotDiv.style.background = "white";
-      screenshotDiv.style.padding = "40px";
-      screenshotDiv.style.fontFamily =
-        "-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif";
+      // Hide selector during export
+      const selector = document.querySelector(".fixed.bottom-20") as HTMLElement;
+      if (selector) selector.style.display = "none";
 
-      // Create header
-      const header = document.createElement("h1");
-      header.textContent = "Round Mate - Table Assignments";
-      header.style.textAlign = "center";
-      header.style.color = "#1f2937";
-      header.style.marginBottom = "10px";
-      header.style.fontSize = "28px";
-      header.style.fontWeight = "bold";
-      screenshotDiv.appendChild(header);
-
-      const dateInfo = document.createElement("p");
-      dateInfo.textContent = `Generated on ${new Date().toLocaleString()}`;
-      dateInfo.style.textAlign = "center";
-      dateInfo.style.color = "#6b7280";
-      dateInfo.style.marginBottom = "30px";
-      dateInfo.style.fontSize = "14px";
-      screenshotDiv.appendChild(dateInfo);
-
-      // Create tables for each seating arrangement
-      tables.forEach((table) => {
-        const tableContainer = document.createElement("div");
-        tableContainer.style.marginBottom = "30px";
-        tableContainer.style.pageBreakInside = "avoid";
-
-        const tableTitle = document.createElement("h2");
-        tableTitle.textContent = `Table ${table.id + 1}`;
-        tableTitle.style.fontSize = "18px";
-        tableTitle.style.fontWeight = "bold";
-        tableTitle.style.marginBottom = "12px";
-        tableTitle.style.color = "#1f2937";
-        tableContainer.appendChild(tableTitle);
-
-        const table_el = document.createElement("table");
-        table_el.style.width = "100%";
-        table_el.style.borderCollapse = "collapse";
-        table_el.style.marginBottom = "20px";
-
-        // Header
-        const thead = document.createElement("thead");
-        const headerRow = document.createElement("tr");
-        headerRow.style.backgroundColor = "#f3f4f6";
-        const seatHeader = document.createElement("th");
-        seatHeader.textContent = "Seat";
-        seatHeader.style.padding = "12px";
-        seatHeader.style.textAlign = "left";
-        seatHeader.style.border = "1px solid #d1d5db";
-        seatHeader.style.fontWeight = "bold";
-        seatHeader.style.color = "#1f2937";
-        const nameHeader = document.createElement("th");
-        nameHeader.textContent = "Participant Name";
-        nameHeader.style.padding = "12px";
-        nameHeader.style.textAlign = "left";
-        nameHeader.style.border = "1px solid #d1d5db";
-        nameHeader.style.fontWeight = "bold";
-        nameHeader.style.color = "#1f2937";
-        headerRow.appendChild(seatHeader);
-        headerRow.appendChild(nameHeader);
-        thead.appendChild(headerRow);
-        table_el.appendChild(thead);
-
-        // Body
-        const tbody = document.createElement("tbody");
-        Array.from({ length: seatsPerTable }).forEach((_, i) => {
-          const participant = participants.find(
-            (p) => p.tableId === table.id && p.seatNumber === i
-          );
-          const row = document.createElement("tr");
-          row.style.backgroundColor = i % 2 === 0 ? "#ffffff" : "#f9fafb";
-
-          const seatCell = document.createElement("td");
-          seatCell.textContent = String(i + 1);
-          seatCell.style.padding = "12px";
-          seatCell.style.border = "1px solid #d1d5db";
-          seatCell.style.color = "#6366f1";
-          seatCell.style.fontWeight = "bold";
-
-          const nameCell = document.createElement("td");
-          nameCell.textContent = participant?.name || "-";
-          nameCell.style.padding = "12px";
-          nameCell.style.border = "1px solid #d1d5db";
-          nameCell.style.color = "#1f2937";
-
-          row.appendChild(seatCell);
-          row.appendChild(nameCell);
-          tbody.appendChild(row);
-        });
-        table_el.appendChild(tbody);
-        tableContainer.appendChild(table_el);
-        screenshotDiv.appendChild(tableContainer);
-      });
-
-      document.body.appendChild(screenshotDiv);
-
-      const canvas = await html2canvas(screenshotDiv, {
-        scale: 2,
+      // Capture the tables ref directly
+      const canvas = await html2canvas(tablesRef.current, {
+        scale: 1.5,
         backgroundColor: "#ffffff",
         useCORS: true,
         allowTaint: true,
         logging: false,
-        windowWidth: 900,
-        windowHeight: document.body.scrollHeight,
+        foreignObjectRendering: false,
       });
 
-      document.body.removeChild(screenshotDiv);
+      // Show selector again
+      if (selector) selector.style.display = "";
 
       const link = document.createElement("a");
       link.href = canvas.toDataURL("image/png");
@@ -212,7 +118,7 @@ export function AssignmentStep({
     } catch (error) {
       console.error("Export error:", error);
       alert(
-        "Export failed. You can:\n\n1. Export as Excel instead (more reliable)\n2. Use your browser's screenshot tool (Cmd+Shift+4 on Mac, Windows+Shift+S on Windows)"
+        "Image export is unavailable due to browser limitations.\n\nInstead, you can:\n• Excel Export - Click '📊 Export as Excel' button\n• Screenshot - Cmd+Shift+4 (Mac) or Windows+Shift+S (Windows)"
       );
     }
   };
