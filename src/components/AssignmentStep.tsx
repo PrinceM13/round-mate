@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import type { Participant, Table } from "@/types";
 import { swapParticipants, generateTables } from "@/lib/assignment";
 import { RoundTable } from "./RoundTable";
-import html2canvas from "html2canvas";
 import { exportToExcel } from "@/lib/excel";
 
 interface AssignmentStepProps {
@@ -28,7 +27,6 @@ export function AssignmentStep({
     seatNumber: number;
     participantId?: string;
   } | null>(null);
-  const tablesRef = useRef<HTMLDivElement>(null);
 
   const tables = generateTables(participants, seatsPerTable);
 
@@ -80,47 +78,6 @@ export function AssignmentStep({
     }
 
     setSelectedSeat(null);
-  };
-
-  const handleExportImage = async () => {
-    if (!participants.length) {
-      alert("No data to export");
-      return;
-    }
-
-    if (!tablesRef.current) {
-      alert("Unable to export at this time");
-      return;
-    }
-
-    try {
-      // Hide selector during export
-      const selector = document.querySelector(".fixed.bottom-20") as HTMLElement;
-      if (selector) selector.style.display = "none";
-
-      // Capture the tables ref directly
-      const canvas = await html2canvas(tablesRef.current, {
-        scale: 1.5,
-        backgroundColor: "#ffffff",
-        useCORS: true,
-        allowTaint: true,
-        logging: false,
-        foreignObjectRendering: false,
-      });
-
-      // Show selector again
-      if (selector) selector.style.display = "";
-
-      const link = document.createElement("a");
-      link.href = canvas.toDataURL("image/png");
-      link.download = "round-mate-assignment.png";
-      link.click();
-    } catch (error) {
-      console.error("Export error:", error);
-      alert(
-        "Image export is unavailable due to browser limitations.\n\nInstead, you can:\n• Excel Export - Click '📊 Export as Excel' button\n• Screenshot - Cmd+Shift+4 (Mac) or Windows+Shift+S (Windows)"
-      );
-    }
   };
 
   const handleExportExcel = () => {
@@ -191,10 +148,7 @@ export function AssignmentStep({
       )}
 
       {/* Tables Display */}
-      <div
-        ref={tablesRef}
-        className="space-y-8 rounded-2xl bg-white p-8 dark:bg-slate-950"
-      >
+      <div className="space-y-8 rounded-2xl bg-white p-8 dark:bg-slate-950">
         {tables.length === 0 ? (
           <p className="text-center text-slate-500">No tables to display</p>
         ) : (
@@ -225,12 +179,6 @@ export function AssignmentStep({
           className="hover:border-primary hover:bg-primary/5 rounded-lg border-2 border-slate-300 px-6 py-3 font-semibold text-slate-900 transition-all dark:border-slate-700 dark:text-white"
         >
           ← Back
-        </button>
-        <button
-          onClick={handleExportImage}
-          className="bg-accent hover:shadow-accent/50 flex-1 rounded-lg px-6 py-3 font-semibold text-white transition-all hover:shadow-lg"
-        >
-          📸 Export as Image
         </button>
         <button
           onClick={handleExportExcel}
