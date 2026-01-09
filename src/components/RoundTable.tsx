@@ -184,7 +184,7 @@ export function RoundTable({
         >
           {tooltip.name}
           <div
-            className="absolute left-1/2 top-full border-4 border-transparent"
+            className="absolute top-full left-1/2 border-4 border-transparent"
             style={{
               borderTopColor: "#6366f1",
               width: 0,
