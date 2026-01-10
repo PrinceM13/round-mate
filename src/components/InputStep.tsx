@@ -207,7 +207,8 @@ export function InputStep({ onNext }: InputStepProps) {
               />
               <button
                 onClick={handleAddParticipant}
-                className="bg-primary hover:bg-opacity-90 rounded-lg px-6 py-2 font-semibold text-white transition-all"
+                disabled={!newName.trim()}
+                className="bg-primary hover:bg-opacity-90 rounded-lg px-6 py-2 font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 Add
               </button>
