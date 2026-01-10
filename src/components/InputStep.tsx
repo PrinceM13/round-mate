@@ -208,7 +208,7 @@ export function InputStep({ onNext }: InputStepProps) {
               <button
                 onClick={handleAddParticipant}
                 disabled={!newName.trim()}
-                className="bg-primary hover:bg-opacity-90 rounded-lg px-6 py-2 font-semibold text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="bg-primary hover:bg-opacity-90 rounded-lg px-6 py-2 font-semibold text-white transition-all disabled:cursor-not-allowed disabled:opacity-50"
               >
                 Add
               </button>
@@ -222,9 +222,19 @@ export function InputStep({ onNext }: InputStepProps) {
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
               Participants
             </h2>
-            <span className="bg-primary/20 text-primary inline-flex items-center justify-center rounded-full px-3 py-1 text-sm font-semibold">
-              {participants.length}
-            </span>
+            <div className="flex items-center gap-2">
+              <span className="bg-primary/20 text-primary inline-flex items-center justify-center rounded-full px-3 py-1 text-sm font-semibold">
+                {participants.length}
+              </span>
+              {participants.length > 0 && (
+                <button
+                  onClick={() => setParticipants([])}
+                  className="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+                >
+                  Clear All
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="max-h-96 space-y-2 overflow-y-auto">
