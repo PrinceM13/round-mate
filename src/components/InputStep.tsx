@@ -116,11 +116,11 @@ export function InputStep({ onNext }: InputStepProps) {
             <input
               type="number"
               min="1"
-              value={seatsPerTable}
+              max="100"
+              value={seatsPerTable || ""}
               onBlur={(e) => {
-                const val = e.target.value;
-                if (val === "" || parseInt(val) < 1) {
-                  setSeatsPerTable(1);
+                if (seatsPerTable === 0 || seatsPerTable < 1) {
+                  setSeatsPerTable(10);
                 }
               }}
               onChange={(e) => {
