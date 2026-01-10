@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import type { Participant } from "@/types";
 import { parseExcelFile, generateExcelTemplate } from "@/lib/excel";
 
@@ -13,6 +13,7 @@ export function InputStep({ onNext }: InputStepProps) {
   const [seatsPerTable, setSeatsPerTable] = useState(10);
   const [newName, setNewName] = useState("");
   const [excelError, setExcelError] = useState("");
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddParticipant = () => {
     if (newName.trim()) {
@@ -159,6 +160,7 @@ export function InputStep({ onNext }: InputStepProps) {
                 onDrop={handleDrop}
               >
                 <input
+                  ref={fileInputRef}
                   type="file"
                   accept=".xlsx,.xls,.csv"
                   onChange={handleExcelUpload}
@@ -228,7 +230,12 @@ export function InputStep({ onNext }: InputStepProps) {
               </span>
               {participants.length > 0 && (
                 <button
-                  onClick={() => setParticipants([])}
+                  onClick={() => {
+                    setParticipants([]);
+                    if (fileInputRef.current) {
+                      fileInputRef.current.value = "";
+                    }
+                  }}
                   className="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 >
                   Clear All
