@@ -28,7 +28,12 @@ export default function Home() {
     setStep("assignment");
   };
 
-  const handleAssignmentComplete = () => {
+  const handleAssignmentComplete = (
+    updatedParticipants: Participant[],
+    updatedTables: Table[]
+  ) => {
+    setParticipants(updatedParticipants);
+    setTables(updatedTables);
     setStep("summary");
   };
 
@@ -47,13 +52,15 @@ export default function Home() {
             onClick={handleReset}
             className="flex items-center gap-3 transition-opacity hover:opacity-80"
           >
-            <Image
-              src="/images/round-mate-logo-no-text.png"
-              alt="Round Mate Logo"
-              width={40}
-              height={40}
-              priority
-            />
+            <div className="flex h-12 w-12 items-center justify-center overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
+              <Image
+                src="/images/round-mate-logo-no-text.png"
+                alt="Round Mate Logo"
+                width={40}
+                height={40}
+                priority
+              />
+            </div>
             <span className="text-xl font-bold text-slate-900 dark:text-white">
               Round Mate
             </span>

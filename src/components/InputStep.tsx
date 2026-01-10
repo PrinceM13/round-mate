@@ -58,6 +58,33 @@ export function InputStep({ onNext }: InputStepProps) {
     }
   };
 
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
+
+  const handleDrop = async (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const files = e.dataTransfer.files;
+    if (files && files.length > 0) {
+      const file = files[0];
+      const result = await parseExcelFile(file);
+      if (result.error) {
+        setExcelError(result.error);
+      } else {
+        const newParticipants: Participant[] = result.names.map((name) => ({
+          id: Math.random().toString(36).substr(2, 9),
+          name,
+          tableId: null,
+          seatNumber: null,
+        }));
+        setParticipants([...participants, ...newParticipants]);
+        setExcelError("");
+      }
+    }
+  };
+
   const handleProceed = () => {
     if (participants.length === 0) {
       alert("Please add at least one participant");
@@ -112,7 +139,11 @@ export function InputStep({ onNext }: InputStepProps) {
               >
                 📥 Download Template
               </button>
-              <div className="relative">
+              <div
+                className="relative"
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+              >
                 <input
                   type="file"
                   accept=".xlsx,.xls,.csv"

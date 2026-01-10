@@ -10,7 +10,7 @@ interface AssignmentStepProps {
   participants: Participant[];
   tables: Table[];
   seatsPerTable: number;
-  onNext: () => void;
+  onNext: (participants: Participant[], tables: Table[]) => void;
   onBack: () => void;
 }
 
@@ -187,7 +187,7 @@ export function AssignmentStep({
           📊 Export as Excel
         </button>
         <button
-          onClick={onNext}
+          onClick={() => onNext(participants, tables)}
           className="from-primary to-secondary flex-1 rounded-lg bg-gradient-to-r px-6 py-3 font-semibold text-white transition-all hover:shadow-lg"
         >
           Continue →
