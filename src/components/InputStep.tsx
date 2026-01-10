@@ -117,9 +117,17 @@ export function InputStep({ onNext }: InputStepProps) {
               type="number"
               min="1"
               value={seatsPerTable}
-              onChange={(e) =>
-                setSeatsPerTable(Math.max(1, parseInt(e.target.value) || 1))
-              }
+              onChange={(e) => {
+                const val = e.target.value;
+                if (val === "") {
+                  setSeatsPerTable(1);
+                } else {
+                  const parsed = parseInt(val);
+                  if (!isNaN(parsed) && parsed >= 1) {
+                    setSeatsPerTable(parsed);
+                  }
+                }
+              }}
               className="focus:border-primary focus:ring-primary/20 w-full rounded-lg border border-slate-300 bg-white px-4 py-2 text-slate-900 placeholder-slate-500 focus:ring-2 focus:outline-none dark:border-slate-700 dark:bg-slate-900 dark:text-white dark:placeholder-slate-400"
             />
             <p className="mt-2 text-sm text-slate-500 dark:text-slate-400">
