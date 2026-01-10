@@ -77,22 +77,22 @@ export default function Home() {
       </nav>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
+      <main className="mx-auto max-w-6xl px-4 py-8 sm:px-6 sm:py-12">
         {step === "home" && (
           <>
             {/* Hero Section */}
-            <section className="mb-12 sm:mb-20 grid gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-8">
+            <section className="mb-12 grid gap-8 sm:mb-20 sm:gap-12 lg:grid-cols-2 lg:gap-8">
               {/* Content */}
               <div className="flex flex-col justify-center space-y-6 sm:space-y-8">
                 <div className="space-y-4">
-                  <h1 className="text-3xl sm:text-4xl lg:text-5xl leading-tight font-bold text-slate-900 dark:text-white">
+                  <h1 className="text-3xl leading-tight font-bold text-slate-900 sm:text-4xl lg:text-5xl dark:text-white">
                     Smart Table Assignment,
                     <span className="from-primary to-secondary bg-gradient-to-r bg-clip-text text-transparent">
                       {" "}
                       Perfectly Rounded
                     </span>
                   </h1>
-                  <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-400">
+                  <p className="text-base text-slate-600 sm:text-lg lg:text-xl dark:text-slate-400">
                     Round Mate simplifies seating arrangements with intelligent
                     auto-assignment. Create balanced, harmonious groups in
                     seconds, not hours.
@@ -207,7 +207,7 @@ export default function Home() {
 
             {/* Features Section */}
             <section className="rounded-3xl border border-slate-200 bg-slate-50/50 p-6 sm:p-12 dark:border-slate-800 dark:bg-slate-900/30">
-              <h2 className="mb-8 sm:mb-12 text-center text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
+              <h2 className="mb-8 text-center text-2xl font-bold text-slate-900 sm:mb-12 sm:text-3xl dark:text-white">
                 Complete Workflow
               </h2>
               <div className="grid gap-6 sm:gap-8 md:grid-cols-3">
