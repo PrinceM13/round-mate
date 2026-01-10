@@ -42,8 +42,9 @@ export function RoundTable({
     return { seatNumber: i, participant };
   });
 
-  // Adaptive SVG sizing based on seats per table
-  const svgSize = Math.max(280, Math.min(400, seatsPerTable * 30));
+  // Adaptive SVG sizing based on seats per table and screen size
+  const baseSize = typeof window !== 'undefined' && window.innerWidth < 640 ? 200 : 280;
+  const svgSize = Math.max(baseSize, Math.min(400, seatsPerTable * 30));
   const radius = svgSize * 0.25;
   const centerX = svgSize / 2;
   const centerY = svgSize / 2;

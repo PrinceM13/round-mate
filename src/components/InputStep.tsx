@@ -106,9 +106,9 @@ export function InputStep({ onNext }: InputStepProps) {
         </p>
       </div>
 
-      <div className="grid gap-8 lg:grid-cols-3">
+      <div className="grid gap-6 sm:gap-8 lg:grid-cols-3">
         {/* Left: Upload & Add Participants */}
-        <div className="space-y-6 lg:col-span-2">
+        <div className="space-y-4 sm:space-y-6 lg:col-span-2">
           {/* Seats Per Table */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 dark:border-slate-800 dark:bg-slate-950">
             <label className="mb-3 block text-sm font-semibold text-slate-900 dark:text-white">

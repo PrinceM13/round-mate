@@ -148,15 +148,15 @@ export function AssignmentStep({
       )}
 
       {/* Tables Display */}
-      <div className="space-y-8 rounded-2xl bg-white p-8 dark:bg-slate-950">
+      <div className="space-y-8 rounded-2xl bg-white p-4 sm:p-8 dark:bg-slate-950">
         {tables.length === 0 ? (
           <p className="text-center text-slate-500">No tables to display</p>
         ) : (
-          <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid gap-4 sm:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
             {tables.map((table) => (
               <div
                 key={table.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 p-6 dark:border-slate-800 dark:bg-slate-900"
+                className="rounded-2xl border border-slate-200 bg-slate-50 p-4 sm:p-6 dark:border-slate-800 dark:bg-slate-900"
                 onDragOver={(e) => e.preventDefault()}
               >
                 <RoundTable
