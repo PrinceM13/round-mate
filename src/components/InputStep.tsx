@@ -117,10 +117,16 @@ export function InputStep({ onNext }: InputStepProps) {
               type="number"
               min="1"
               value={seatsPerTable}
+              onBlur={(e) => {
+                const val = e.target.value;
+                if (val === "" || parseInt(val) < 1) {
+                  setSeatsPerTable(1);
+                }
+              }}
               onChange={(e) => {
                 const val = e.target.value;
                 if (val === "") {
-                  setSeatsPerTable(1);
+                  setSeatsPerTable(0);
                 } else {
                   const parsed = parseInt(val);
                   if (!isNaN(parsed) && parsed >= 1) {

@@ -56,8 +56,8 @@ export default function Home() {
               <Image
                 src="/images/round-mate-logo-no-text.png"
                 alt="Round Mate Logo"
-                width={40}
-                height={40}
+                width={48}
+                height={48}
                 priority
               />
             </div>
