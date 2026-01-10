@@ -43,7 +43,8 @@ export function RoundTable({
   });
 
   // Adaptive SVG sizing based on seats per table and screen size
-  const baseSize = typeof window !== 'undefined' && window.innerWidth < 640 ? 200 : 280;
+  const baseSize =
+    typeof window !== "undefined" && window.innerWidth < 640 ? 200 : 280;
   const svgSize = Math.max(baseSize, Math.min(400, seatsPerTable * 30));
   const radius = svgSize * 0.25;
   const centerX = svgSize / 2;

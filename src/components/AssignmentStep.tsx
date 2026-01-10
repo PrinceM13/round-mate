@@ -152,7 +152,7 @@ export function AssignmentStep({
         {tables.length === 0 ? (
           <p className="text-center text-slate-500">No tables to display</p>
         ) : (
-          <div className="grid gap-4 sm:gap-8 grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 sm:gap-8 md:grid-cols-2 lg:grid-cols-3">
             {tables.map((table) => (
               <div
                 key={table.id}

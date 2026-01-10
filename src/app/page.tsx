@@ -77,29 +77,29 @@ export default function Home() {
       </nav>
 
       {/* Main Content */}
-      <main className="mx-auto max-w-6xl px-6 py-12">
+      <main className="mx-auto max-w-6xl px-4 sm:px-6 py-8 sm:py-12">
         {step === "home" && (
           <>
             {/* Hero Section */}
-            <section className="mb-20 grid gap-12 lg:grid-cols-2 lg:gap-8">
+            <section className="mb-12 sm:mb-20 grid gap-8 sm:gap-12 lg:grid-cols-2 lg:gap-8">
               {/* Content */}
-              <div className="flex flex-col justify-center space-y-8">
+              <div className="flex flex-col justify-center space-y-6 sm:space-y-8">
                 <div className="space-y-4">
-                  <h1 className="text-5xl leading-tight font-bold text-slate-900 dark:text-white">
+                  <h1 className="text-3xl sm:text-4xl lg:text-5xl leading-tight font-bold text-slate-900 dark:text-white">
                     Smart Table Assignment,
                     <span className="from-primary to-secondary bg-gradient-to-r bg-clip-text text-transparent">
                       {" "}
                       Perfectly Rounded
                     </span>
                   </h1>
-                  <p className="text-xl text-slate-600 dark:text-slate-400">
+                  <p className="text-base sm:text-lg lg:text-xl text-slate-600 dark:text-slate-400">
                     Round Mate simplifies seating arrangements with intelligent
                     auto-assignment. Create balanced, harmonious groups in
                     seconds, not hours.
                   </p>
                 </div>
 
-                <div className="space-y-3">
+                <div className="space-y-2 sm:space-y-3">
                   <div className="flex items-start gap-3">
                     <div className="bg-primary/20 mt-1 rounded-full p-2">
                       <svg
@@ -189,7 +189,7 @@ export default function Home() {
 
               {/* Logo Section */}
               <div className="flex items-center justify-center">
-                <div className="relative h-96 w-96">
+                <div className="relative h-64 w-64 sm:h-96 sm:w-96">
                   <div className="from-primary/20 to-secondary/20 absolute inset-0 rounded-3xl bg-gradient-to-br blur-3xl" />
                   <div className="relative flex items-center justify-center rounded-3xl bg-white p-8 shadow-2xl dark:bg-slate-900">
                     <Image
@@ -206,11 +206,11 @@ export default function Home() {
             </section>
 
             {/* Features Section */}
-            <section className="rounded-3xl border border-slate-200 bg-slate-50/50 p-12 dark:border-slate-800 dark:bg-slate-900/30">
-              <h2 className="mb-12 text-center text-3xl font-bold text-slate-900 dark:text-white">
+            <section className="rounded-3xl border border-slate-200 bg-slate-50/50 p-6 sm:p-12 dark:border-slate-800 dark:bg-slate-900/30">
+              <h2 className="mb-8 sm:mb-12 text-center text-2xl sm:text-3xl font-bold text-slate-900 dark:text-white">
                 Complete Workflow
               </h2>
-              <div className="grid gap-8 md:grid-cols-3">
+              <div className="grid gap-6 sm:gap-8 md:grid-cols-3">
                 {[
                   {
                     step: "1",
