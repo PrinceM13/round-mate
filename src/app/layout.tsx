@@ -14,7 +14,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Round Mate - Smart Table Assignment",
-  description: "Round Mate simplifies seating arrangements with intelligent auto-assignment. Create balanced, harmonious groups in seconds.",
+  description:
+    "Round Mate simplifies seating arrangements with intelligent auto-assignment. Create balanced, harmonious groups in seconds.",
   icons: {
     icon: "/images/round-mate-logo-no-text.png",
   },
