@@ -139,6 +139,11 @@ function parseAssignmentMode(data: string[][]): ParseResult {
       const seatStr = String(row[seatColIdx]).trim();
       const name = String(row[nameColIdx]).trim();
 
+      // ASSIGNMENT MODE: STRICT VALIDATION
+      // In assignment mode with explicit columns, we expect:
+      // - Table + Name (required)
+      // - Seat (required if Seat column exists in header)
+
       // Validation: Check for missing name
       if (!name) {
         validationIssues.push({
@@ -150,11 +155,22 @@ function parseAssignmentMode(data: string[][]): ParseResult {
         continue;
       }
 
-      // Validation: Check for missing table
+      // Validation: Check for missing table - this is REQUIRED in assignment mode
       if (!tableStr) {
         validationIssues.push({
           row: i + 1,
-          issue: `Missing table assignment for "${name}"`,
+          issue: `Missing table assignment for "${name}" - in assignment format, Table is required for all rows`,
+          severity: "error",
+        });
+        skippedRows++;
+        continue;
+      }
+
+      // Validation: Check for missing seat - REQUIRED if Seat column exists
+      if (seatColIdx !== -1 && !seatStr) {
+        validationIssues.push({
+          row: i + 1,
+          issue: `Missing seat number for "${name}" at "${tableStr}" - Seat is required in assignment format`,
           severity: "error",
         });
         skippedRows++;
@@ -173,11 +189,23 @@ function parseAssignmentMode(data: string[][]): ParseResult {
         continue;
       }
 
-      // Note: Missing seat number is OK - it will be null and displayed as "-"
-      // No warning needed for this case
+      // Parse seat number - must be valid if it exists
+      let seatNum: number | null = null;
+      if (seatStr) {
+        const seatNum_parsed = parseInt(seatStr);
+        if (isNaN(seatNum_parsed)) {
+          validationIssues.push({
+            row: i + 1,
+            issue: `Invalid seat number "${seatStr}" for "${name}" - must be a number`,
+            severity: "error",
+          });
+          skippedRows++;
+          continue;
+        }
+        seatNum = seatNum_parsed - 1; // Convert to 0-indexed
+      }
 
       const tableNum = parseInt(tableMatch[0]) - 1; // Convert to 0-indexed
-      const seatNum = seatStr ? parseInt(seatStr) - 1 : null; // Convert to 0-indexed, handle empty seats
 
       // Create participant
       const participant: Participant = {
@@ -216,19 +244,38 @@ function parseAssignmentMode(data: string[][]): ParseResult {
       (a, b) => a.id - b.id
     );
 
-    // Check if we have valid data
-    if (participants.length === 0) {
+    // Check for validation errors (strict mode for assignment files)
+    const hasErrors = validationIssues.some(
+      (issue) => issue.severity === "error"
+    );
+
+    if (hasErrors && participants.length === 0) {
+      // No valid participants at all - reject the file
       return {
         mode: "assignment",
         participants: [],
         tables: [],
         error:
-          "No valid participants found in assignment file. Please check the data format.",
+          "Invalid assignment file format: All rows have missing required data (Table and/or Name fields). Please ensure all rows have both Table and Name values.",
         validationIssues,
         skippedRows,
       };
     }
 
+    if (hasErrors && participants.length > 0) {
+      // Some rows are valid, some aren't - show modal to let user decide
+      return {
+        mode: "assignment",
+        participants,
+        tables,
+        seatsPerTable: maxSeatsPerTable,
+        validationIssues:
+          validationIssues.length > 0 ? validationIssues : undefined,
+        skippedRows: skippedRows > 0 ? skippedRows : undefined,
+      };
+    }
+
+    // All data is valid
     return {
       mode: "assignment",
       participants,
