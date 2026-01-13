@@ -222,7 +222,8 @@ function parseAssignmentMode(data: string[][]): ParseResult {
         mode: "assignment",
         participants: [],
         tables: [],
-        error: "No valid participants found in assignment file. Please check the data format.",
+        error:
+          "No valid participants found in assignment file. Please check the data format.",
         validationIssues,
         skippedRows,
       };
@@ -233,7 +234,8 @@ function parseAssignmentMode(data: string[][]): ParseResult {
       participants,
       tables,
       seatsPerTable: maxSeatsPerTable,
-      validationIssues: validationIssues.length > 0 ? validationIssues : undefined,
+      validationIssues:
+        validationIssues.length > 0 ? validationIssues : undefined,
       skippedRows: skippedRows > 0 ? skippedRows : undefined,
     };
   } catch (error) {

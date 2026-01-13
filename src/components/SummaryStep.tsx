@@ -93,7 +93,7 @@ export function SummaryStep({
                           {p.seatNumber + 1}
                         </span>
                       ) : (
-                        <span className="bg-slate-300/20 text-slate-600 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold dark:bg-slate-600/20 dark:text-slate-400">
+                        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-slate-300/20 text-xs font-bold text-slate-600 dark:bg-slate-600/20 dark:text-slate-400">
                           -
                         </span>
                       )}

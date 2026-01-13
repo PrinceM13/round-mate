@@ -141,7 +141,7 @@ export function InputStep({ onNext, onResume }: InputStepProps) {
     // User accepts the data with warnings
     setParticipants(validationModal.participants);
     setValidationModal({ ...validationModal, isOpen: false });
-    
+
     setFileStatus({
       type: "assignment",
       message: `✓ Loaded assignment with ${validationModal.participants.length} participants (${validationModal.skippedRows} rows skipped due to missing data)`,
@@ -458,12 +458,13 @@ export function InputStep({ onNext, onResume }: InputStepProps) {
                 ⚠️ Data Issues Found
               </h2>
               <p className="text-slate-600 dark:text-slate-400">
-                {validationModal.skippedRows} of {validationModal.totalRows} rows have missing or invalid data
+                {validationModal.skippedRows} of {validationModal.totalRows}{" "}
+                rows have missing or invalid data
               </p>
             </div>
 
             {/* Issues List */}
-            <div className="mb-6 max-h-64 overflow-y-auto space-y-2 rounded-lg bg-slate-50 p-4 dark:bg-slate-900">
+            <div className="mb-6 max-h-64 space-y-2 overflow-y-auto rounded-lg bg-slate-50 p-4 dark:bg-slate-900">
               {validationModal.issues.map((issue, idx) => (
                 <div
                   key={idx}
@@ -500,8 +501,9 @@ export function InputStep({ onNext, onResume }: InputStepProps) {
             {/* Summary */}
             <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
               <p className="text-sm text-blue-900 dark:text-blue-100">
-                <strong>Summary:</strong> {validationModal.participants.length} valid participants will be loaded.
-                The {validationModal.skippedRows} rows with errors will be skipped.
+                <strong>Summary:</strong> {validationModal.participants.length}{" "}
+                valid participants will be loaded. The{" "}
+                {validationModal.skippedRows} rows with errors will be skipped.
               </p>
             </div>
 
@@ -526,4 +528,3 @@ export function InputStep({ onNext, onResume }: InputStepProps) {
     </div>
   );
 }
-
