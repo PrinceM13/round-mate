@@ -88,9 +88,15 @@ export function SummaryStep({
                       key={p.id}
                       className="flex items-center gap-2 rounded-lg bg-white p-2 text-sm dark:bg-slate-800"
                     >
-                      <span className="bg-primary/20 text-primary inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold">
-                        {p.seatNumber! + 1}
-                      </span>
+                      {p.seatNumber !== null ? (
+                        <span className="bg-primary/20 text-primary inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold">
+                          {p.seatNumber + 1}
+                        </span>
+                      ) : (
+                        <span className="bg-slate-300/20 text-slate-600 inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold dark:bg-slate-600/20 dark:text-slate-400">
+                          -
+                        </span>
+                      )}
                       <span className="text-slate-900 dark:text-white">
                         {p.name}
                       </span>

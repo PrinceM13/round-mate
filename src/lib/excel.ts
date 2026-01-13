@@ -173,14 +173,8 @@ function parseAssignmentMode(data: string[][]): ParseResult {
         continue;
       }
 
-      // Validation: Warning for missing seat number
-      if (!seatStr) {
-        validationIssues.push({
-          row: i + 1,
-          issue: `Missing seat number for "${name}" at "${tableStr}"`,
-          severity: "warning",
-        });
-      }
+      // Note: Missing seat number is OK - it will be null and displayed as "-"
+      // No warning needed for this case
 
       const tableNum = parseInt(tableMatch[0]) - 1; // Convert to 0-indexed
       const seatNum = seatStr ? parseInt(seatStr) - 1 : null; // Convert to 0-indexed, handle empty seats
