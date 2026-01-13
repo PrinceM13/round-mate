@@ -2,6 +2,7 @@
 
 import { useState, useRef } from "react";
 import type { Participant, Table } from "@/types";
+import type { ValidationIssue } from "@/lib/excel";
 import { parseExcelFile, generateExcelTemplate } from "@/lib/excel";
 
 interface InputStepProps {
@@ -13,6 +14,16 @@ interface InputStepProps {
   ) => void;
 }
 
+interface ValidationModal {
+  isOpen: boolean;
+  issues: ValidationIssue[];
+  skippedRows: number;
+  totalRows: number;
+  participants: Participant[];
+  tables: Table[];
+  seatsPerTable: number;
+}
+
 export function InputStep({ onNext, onResume }: InputStepProps) {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [seatsPerTable, setSeatsPerTable] = useState(10);
@@ -22,6 +33,15 @@ export function InputStep({ onNext, onResume }: InputStepProps) {
     type: "template" | "assignment";
     message: string;
   } | null>(null);
+  const [validationModal, setValidationModal] = useState<ValidationModal>({
+    isOpen: false,
+    issues: [],
+    skippedRows: 0,
+    totalRows: 0,
+    participants: [],
+    tables: [],
+    seatsPerTable: 10,
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddParticipant = () => {
@@ -69,6 +89,21 @@ export function InputStep({ onNext, onResume }: InputStepProps) {
         result.tables &&
         onResume
       ) {
+        // Check if there are validation issues
+        if (result.validationIssues && result.validationIssues.length > 0) {
+          // Show validation modal
+          setValidationModal({
+            isOpen: true,
+            issues: result.validationIssues,
+            skippedRows: result.skippedRows || 0,
+            totalRows: result.participants.length + (result.skippedRows || 0),
+            participants: result.participants,
+            tables: result.tables,
+            seatsPerTable: result.seatsPerTable || 10,
+          });
+          return;
+        }
+
         setFileStatus({
           type: "assignment",
           message: `✓ Loaded assignment with ${result.participants.length} participants across ${result.tables.length} tables`,
@@ -102,6 +137,34 @@ export function InputStep({ onNext, onResume }: InputStepProps) {
     }
   };
 
+  const handleValidationConfirm = () => {
+    // User accepts the data with warnings
+    setParticipants(validationModal.participants);
+    setValidationModal({ ...validationModal, isOpen: false });
+    
+    setFileStatus({
+      type: "assignment",
+      message: `✓ Loaded assignment with ${validationModal.participants.length} participants (${validationModal.skippedRows} rows skipped due to missing data)`,
+    });
+
+    // Auto-proceed to resume
+    setTimeout(() => {
+      onResume!(
+        validationModal.participants,
+        validationModal.tables,
+        validationModal.seatsPerTable
+      );
+    }, 1000);
+  };
+
+  const handleValidationCancel = () => {
+    // User rejects the file
+    setValidationModal({ ...validationModal, isOpen: false });
+    setExcelError(
+      `File rejected: ${validationModal.skippedRows} rows had missing required data. Please fix the file and try again.`
+    );
+  };
+
   const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
     e.preventDefault();
     e.stopPropagation();
@@ -130,6 +193,20 @@ export function InputStep({ onNext, onResume }: InputStepProps) {
         result.tables &&
         onResume
       ) {
+        // Check if there are validation issues
+        if (result.validationIssues && result.validationIssues.length > 0) {
+          setValidationModal({
+            isOpen: true,
+            issues: result.validationIssues,
+            skippedRows: result.skippedRows || 0,
+            totalRows: result.participants.length + (result.skippedRows || 0),
+            participants: result.participants,
+            tables: result.tables,
+            seatsPerTable: result.seatsPerTable || 10,
+          });
+          return;
+        }
+
         setFileStatus({
           type: "assignment",
           message: `✓ Loaded assignment with ${result.participants.length} participants across ${result.tables.length} tables`,
@@ -371,6 +448,82 @@ export function InputStep({ onNext, onResume }: InputStepProps) {
           </button>
         </div>
       </div>
+
+      {/* Validation Issues Modal */}
+      {validationModal.isOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+          <div className="max-h-96 w-full max-w-2xl overflow-auto rounded-2xl border border-slate-200 bg-white p-8 dark:border-slate-800 dark:bg-slate-950">
+            <div className="mb-6 space-y-2">
+              <h2 className="text-2xl font-bold text-slate-900 dark:text-white">
+                ⚠️ Data Issues Found
+              </h2>
+              <p className="text-slate-600 dark:text-slate-400">
+                {validationModal.skippedRows} of {validationModal.totalRows} rows have missing or invalid data
+              </p>
+            </div>
+
+            {/* Issues List */}
+            <div className="mb-6 max-h-64 overflow-y-auto space-y-2 rounded-lg bg-slate-50 p-4 dark:bg-slate-900">
+              {validationModal.issues.map((issue, idx) => (
+                <div
+                  key={idx}
+                  className={`flex items-start gap-3 rounded-lg p-3 ${
+                    issue.severity === "error"
+                      ? "bg-red-50 dark:bg-red-950"
+                      : "bg-yellow-50 dark:bg-yellow-950"
+                  }`}
+                >
+                  <div
+                    className={`mt-1 text-lg ${
+                      issue.severity === "error"
+                        ? "text-red-600 dark:text-red-400"
+                        : "text-yellow-600 dark:text-yellow-400"
+                    }`}
+                  >
+                    {issue.severity === "error" ? "❌" : "⚠️"}
+                  </div>
+                  <div className="flex-1">
+                    <p
+                      className={`text-sm font-semibold ${
+                        issue.severity === "error"
+                          ? "text-red-900 dark:text-red-100"
+                          : "text-yellow-900 dark:text-yellow-100"
+                      }`}
+                    >
+                      {issue.issue}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Summary */}
+            <div className="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-4 dark:border-blue-900 dark:bg-blue-950">
+              <p className="text-sm text-blue-900 dark:text-blue-100">
+                <strong>Summary:</strong> {validationModal.participants.length} valid participants will be loaded.
+                The {validationModal.skippedRows} rows with errors will be skipped.
+              </p>
+            </div>
+
+            {/* Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={handleValidationConfirm}
+                className="flex-1 rounded-lg bg-blue-600 px-4 py-3 font-semibold text-white transition-all hover:bg-blue-700"
+              >
+                ✓ Load Valid Data ({validationModal.participants.length})
+              </button>
+              <button
+                onClick={handleValidationCancel}
+                className="flex-1 rounded-lg border-2 border-red-300 bg-white px-4 py-3 font-semibold text-red-600 transition-all hover:bg-red-50 dark:border-red-700 dark:bg-slate-900 dark:text-red-400 dark:hover:bg-red-950"
+              >
+                ✕ Reject & Fix File
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

@@ -1,6 +1,12 @@
 import * as XLSX from "xlsx";
 import type { Participant, Table } from "@/types";
 
+export interface ValidationIssue {
+  row: number;
+  issue: string;
+  severity: "warning" | "error";
+}
+
 export interface ParseResult {
   names?: string[]; // For template mode (only names)
   participants?: Participant[]; // For assignment mode (full data)
@@ -8,6 +14,8 @@ export interface ParseResult {
   seatsPerTable?: number; // For assignment mode
   mode: "template" | "assignment"; // Indicates which mode was detected
   error?: string;
+  validationIssues?: ValidationIssue[]; // Data quality warnings/errors
+  skippedRows?: number; // Number of rows skipped due to missing data
 }
 
 /**
@@ -97,6 +105,7 @@ function parseTemplateMode(data: string[][]): ParseResult {
 
 /**
  * Parse assignment mode: Extract full table + seat + participant assignments
+ * Validates data and reports issues without silently skipping
  */
 function parseAssignmentMode(data: string[][]): ParseResult {
   try {
@@ -118,6 +127,8 @@ function parseAssignmentMode(data: string[][]): ParseResult {
       { id: number; seatsPerTable: number; participants: Participant[] }
     >();
     let maxSeatsPerTable = 10; // default
+    const validationIssues: ValidationIssue[] = [];
+    let skippedRows = 0;
 
     // Parse data rows
     for (let i = 1; i < data.length; i++) {
@@ -128,11 +139,48 @@ function parseAssignmentMode(data: string[][]): ParseResult {
       const seatStr = String(row[seatColIdx]).trim();
       const name = String(row[nameColIdx]).trim();
 
-      if (!name) continue;
+      // Validation: Check for missing name
+      if (!name) {
+        validationIssues.push({
+          row: i + 1,
+          issue: `Missing name in row ${i + 1}`,
+          severity: "error",
+        });
+        skippedRows++;
+        continue;
+      }
+
+      // Validation: Check for missing table
+      if (!tableStr) {
+        validationIssues.push({
+          row: i + 1,
+          issue: `Missing table assignment for "${name}"`,
+          severity: "error",
+        });
+        skippedRows++;
+        continue;
+      }
 
       // Extract table number (e.g., "Table 1" -> 1)
       const tableMatch = tableStr.match(/\d+/);
-      if (!tableMatch) continue;
+      if (!tableMatch) {
+        validationIssues.push({
+          row: i + 1,
+          issue: `Invalid table format "${tableStr}" for "${name}" (expected "Table X")`,
+          severity: "error",
+        });
+        skippedRows++;
+        continue;
+      }
+
+      // Validation: Warning for missing seat number
+      if (!seatStr) {
+        validationIssues.push({
+          row: i + 1,
+          issue: `Missing seat number for "${name}" at "${tableStr}"`,
+          severity: "warning",
+        });
+      }
 
       const tableNum = parseInt(tableMatch[0]) - 1; // Convert to 0-indexed
       const seatNum = seatStr ? parseInt(seatStr) - 1 : null; // Convert to 0-indexed, handle empty seats
@@ -174,11 +222,25 @@ function parseAssignmentMode(data: string[][]): ParseResult {
       (a, b) => a.id - b.id
     );
 
+    // Check if we have valid data
+    if (participants.length === 0) {
+      return {
+        mode: "assignment",
+        participants: [],
+        tables: [],
+        error: "No valid participants found in assignment file. Please check the data format.",
+        validationIssues,
+        skippedRows,
+      };
+    }
+
     return {
       mode: "assignment",
       participants,
       tables,
       seatsPerTable: maxSeatsPerTable,
+      validationIssues: validationIssues.length > 0 ? validationIssues : undefined,
+      skippedRows: skippedRows > 0 ? skippedRows : undefined,
     };
   } catch (error) {
     return {
