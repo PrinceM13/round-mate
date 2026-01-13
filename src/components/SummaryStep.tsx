@@ -88,7 +88,7 @@ export function SummaryStep({
                       key={p.id}
                       className="flex items-center gap-2 rounded-lg bg-white p-2 text-sm dark:bg-slate-800"
                     >
-                      {p.seatNumber !== null ? (
+                      {typeof p.seatNumber === "number" ? (
                         <span className="bg-primary/20 text-primary inline-flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold">
                           {p.seatNumber + 1}
                         </span>
