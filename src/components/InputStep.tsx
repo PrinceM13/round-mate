@@ -1,18 +1,27 @@
 "use client";
 
 import { useState, useRef } from "react";
-import type { Participant } from "@/types";
+import type { Participant, Table } from "@/types";
 import { parseExcelFile, generateExcelTemplate } from "@/lib/excel";
 
 interface InputStepProps {
   onNext: (participants: Participant[], seatsPerTable: number) => void;
+  onResume?: (
+    participants: Participant[],
+    tables: Table[],
+    seatsPerTable: number
+  ) => void;
 }
 
-export function InputStep({ onNext }: InputStepProps) {
+export function InputStep({ onNext, onResume }: InputStepProps) {
   const [participants, setParticipants] = useState<Participant[]>([]);
   const [seatsPerTable, setSeatsPerTable] = useState(10);
   const [newName, setNewName] = useState("");
   const [excelError, setExcelError] = useState("");
+  const [fileStatus, setFileStatus] = useState<{
+    type: "template" | "assignment";
+    message: string;
+  } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleAddParticipant = () => {
@@ -44,9 +53,44 @@ export function InputStep({ onNext }: InputStepProps) {
     const file = e.target.files?.[0];
     if (file) {
       const result = await parseExcelFile(file);
+
       if (result.error) {
         setExcelError(result.error);
-      } else {
+        setFileStatus(null);
+        return;
+      }
+
+      setExcelError("");
+
+      // ASSIGNMENT MODE: User uploaded a saved assignment file
+      if (
+        result.mode === "assignment" &&
+        result.participants &&
+        result.tables &&
+        onResume
+      ) {
+        setFileStatus({
+          type: "assignment",
+          message: `✓ Loaded assignment with ${result.participants.length} participants across ${result.tables.length} tables`,
+        });
+        setParticipants(result.participants);
+        // Auto-proceed to resume
+        setTimeout(() => {
+          onResume(
+            result.participants!,
+            result.tables!,
+            result.seatsPerTable || 10
+          );
+        }, 1000);
+        return;
+      }
+
+      // TEMPLATE MODE: User uploaded a template with just names
+      if (result.mode === "template" && result.names) {
+        setFileStatus({
+          type: "template",
+          message: `✓ Loaded ${result.names.length} participant(s) from template`,
+        });
         const newParticipants: Participant[] = result.names.map((name) => ({
           id: Math.random().toString(36).substr(2, 9),
           name,
@@ -54,7 +98,6 @@ export function InputStep({ onNext }: InputStepProps) {
           seatNumber: null,
         }));
         setParticipants([...participants, ...newParticipants]);
-        setExcelError("");
       }
     }
   };
@@ -71,9 +114,43 @@ export function InputStep({ onNext }: InputStepProps) {
     if (files && files.length > 0) {
       const file = files[0];
       const result = await parseExcelFile(file);
+
       if (result.error) {
         setExcelError(result.error);
-      } else {
+        setFileStatus(null);
+        return;
+      }
+
+      setExcelError("");
+
+      // ASSIGNMENT MODE: Resume from saved file
+      if (
+        result.mode === "assignment" &&
+        result.participants &&
+        result.tables &&
+        onResume
+      ) {
+        setFileStatus({
+          type: "assignment",
+          message: `✓ Loaded assignment with ${result.participants.length} participants across ${result.tables.length} tables`,
+        });
+        setParticipants(result.participants);
+        setTimeout(() => {
+          onResume(
+            result.participants!,
+            result.tables!,
+            result.seatsPerTable || 10
+          );
+        }, 1000);
+        return;
+      }
+
+      // TEMPLATE MODE: Start fresh
+      if (result.mode === "template" && result.names) {
+        setFileStatus({
+          type: "template",
+          message: `✓ Loaded ${result.names.length} participant(s) from template`,
+        });
         const newParticipants: Participant[] = result.names.map((name) => ({
           id: Math.random().toString(36).substr(2, 9),
           name,
@@ -81,7 +158,6 @@ export function InputStep({ onNext }: InputStepProps) {
           seatNumber: null,
         }));
         setParticipants([...participants, ...newParticipants]);
-        setExcelError("");
       }
     }
   };
@@ -119,7 +195,7 @@ export function InputStep({ onNext }: InputStepProps) {
               min="1"
               max="100"
               value={seatsPerTable || ""}
-              onBlur={(e) => {
+              onBlur={() => {
                 if (seatsPerTable === 0 || seatsPerTable < 1) {
                   setSeatsPerTable(10);
                 }
@@ -187,6 +263,17 @@ export function InputStep({ onNext }: InputStepProps) {
                 {excelError}
               </p>
             )}
+            {fileStatus && (
+              <p
+                className={`mt-3 text-sm ${
+                  fileStatus.type === "assignment"
+                    ? "text-green-600 dark:text-green-400"
+                    : "text-blue-600 dark:text-blue-400"
+                }`}
+              >
+                {fileStatus.message}
+              </p>
+            )}
           </div>
 
           {/* Manual Add */}
@@ -235,6 +322,7 @@ export function InputStep({ onNext }: InputStepProps) {
                     if (fileInputRef.current) {
                       fileInputRef.current.value = "";
                     }
+                    setFileStatus(null);
                   }}
                   className="text-xs font-semibold text-red-600 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
                 >

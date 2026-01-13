@@ -28,6 +28,17 @@ export default function Home() {
     setStep("assignment");
   };
 
+  const handleResumeAssignment = (
+    resumedParticipants: Participant[],
+    resumedTables: Table[],
+    seats: number
+  ) => {
+    setSeatsPerTable(seats);
+    setParticipants(resumedParticipants);
+    setTables(resumedTables);
+    setStep("summary"); // Skip to summary since assignment is already done
+  };
+
   const handleAssignmentComplete = (
     updatedParticipants: Participant[],
     updatedTables: Table[]
@@ -248,7 +259,12 @@ export default function Home() {
           </>
         )}
 
-        {step === "input" && <InputStep onNext={handleStartAssignment} />}
+        {step === "input" && (
+          <InputStep
+            onNext={handleStartAssignment}
+            onResume={handleResumeAssignment}
+          />
+        )}
 
         {step === "assignment" && (
           <AssignmentStep
