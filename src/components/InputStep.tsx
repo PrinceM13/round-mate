@@ -453,7 +453,9 @@ export function InputStep({
           </div>
 
           {/* Randomize Seating Option - only show for initial assignment */}
-          {!participants.some((p) => p.tableId !== null && p.seatNumber !== null) && (
+          {!participants.some(
+            (p) => p.tableId !== null && p.seatNumber !== null
+          ) && (
             <div className="mt-6 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
               <input
                 type="checkbox"
