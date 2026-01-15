@@ -43,19 +43,34 @@ export async function parseExcelFile(file: File): Promise<ParseResult> {
     }
 
     // Detect file type by checking headers and columns
-    const headerRow = data[0] as (string | undefined)[];
-    const hasTableColumn = headerRow.some((h) =>
-      h ? /^table$/i.test(h.toString()) : false
-    );
-    const hasSeatColumn = headerRow.some((h) =>
-      h ? /^seat$/i.test(h.toString()) : false
-    );
-    const hasNameColumn = headerRow.some((h) =>
-      h ? /^name$/i.test(h.toString()) : false
-    );
+    // Check both row 0 and row 1 (in case row 0 is metadata)
+    const row0 = data[0] as (string | undefined)[];
+    const row1 = data[1] as (string | undefined)[];
 
-    // ASSIGNMENT MODE: File has Table + Seat + Name columns
-    if (hasTableColumn && hasSeatColumn && hasNameColumn) {
+    const checkRow = (row: (string | undefined)[]) => ({
+      hasTableColumn: row.some((h) =>
+        h ? /^table$/i.test(h.toString()) : false
+      ),
+      hasSeatColumn: row.some((h) =>
+        h ? /^seat$/i.test(h.toString()) : false
+      ),
+      hasNameColumn: row.some((h) =>
+        h ? /^name$/i.test(h.toString()) : false
+      ),
+    });
+
+    const row0Check = checkRow(row0);
+    const row1Check = checkRow(row1);
+
+    // ASSIGNMENT MODE: File has Table + Seat + Name columns (in either row 0 or row 1)
+    if (
+      (row0Check.hasTableColumn &&
+        row0Check.hasSeatColumn &&
+        row0Check.hasNameColumn) ||
+      (row1Check.hasTableColumn &&
+        row1Check.hasSeatColumn &&
+        row1Check.hasNameColumn)
+    ) {
       return parseAssignmentMode(data as string[][]);
     }
 
@@ -109,8 +124,23 @@ function parseTemplateMode(data: string[][]): ParseResult {
  */
 function parseAssignmentMode(data: string[][]): ParseResult {
   try {
+    // Check if first row is metadata (SeatsPerTable info)
+    let metadataSeatsPerTable: number | null = null;
+    let headerRowIdx = 0;
+
+    if (
+      data[0] &&
+      data[0][0] &&
+      /^seatspertable$/i.test(data[0][0].toString())
+    ) {
+      // First row is metadata
+      const seatsValue = data[0][1];
+      metadataSeatsPerTable = seatsValue ? parseInt(String(seatsValue)) : null;
+      headerRowIdx = 1; // Headers are in second row
+    }
+
     // Find column indices
-    const headers = data[0];
+    const headers = data[headerRowIdx];
     const tableColIdx = headers.findIndex((h) => /^table$/i.test(h.toString()));
     const seatColIdx = headers.findIndex((h) => /^seat$/i.test(h.toString()));
     const nameColIdx = headers.findIndex((h) => /^name$/i.test(h.toString()));
@@ -126,12 +156,12 @@ function parseAssignmentMode(data: string[][]): ParseResult {
       number,
       { id: number; seatsPerTable: number; participants: Participant[] }
     >();
-    let maxSeatsPerTable = 10; // default
+    let maxSeatsPerTable = metadataSeatsPerTable ?? 10; // Use metadata value or default to 10
     const validationIssues: ValidationIssue[] = [];
     let skippedRows = 0;
 
-    // Parse data rows
-    for (let i = 1; i < data.length; i++) {
+    // Parse data rows (start after header row, which may be row 0 or 1 if metadata present)
+    for (let i = headerRowIdx + 1; i < data.length; i++) {
       const row = data[i];
       if (!row || row.length === 0) continue;
 
@@ -228,8 +258,12 @@ function parseAssignmentMode(data: string[][]): ParseResult {
 
       tableMap.get(tableNum)!.participants.push(participant);
 
-      // Track max seats seen
-      if (seatNum !== null && seatNum + 1 > maxSeatsPerTable) {
+      // Track max seats seen (only if we didn't get it from metadata)
+      if (
+        metadataSeatsPerTable === null &&
+        seatNum !== null &&
+        seatNum + 1 > maxSeatsPerTable
+      ) {
         maxSeatsPerTable = seatNum + 1;
       }
     }
@@ -269,21 +303,17 @@ function parseAssignmentMode(data: string[][]): ParseResult {
         participants,
         tables,
         seatsPerTable: maxSeatsPerTable,
-        validationIssues:
-          validationIssues.length > 0 ? validationIssues : undefined,
-        skippedRows: skippedRows > 0 ? skippedRows : undefined,
+        validationIssues,
+        skippedRows,
       };
     }
 
-    // All data is valid
+    // All data is valid - no validation issues to report
     return {
       mode: "assignment",
       participants,
       tables,
       seatsPerTable: maxSeatsPerTable,
-      validationIssues:
-        validationIssues.length > 0 ? validationIssues : undefined,
-      skippedRows: skippedRows > 0 ? skippedRows : undefined,
     };
   } catch (error) {
     return {
@@ -319,10 +349,18 @@ export function exportToExcel(
     | Table[]
     | Array<{
         id: number;
+        seatsPerTable?: number;
         participants: Array<{ name: string; seatNumber: number | null }>;
       }>
 ): void {
-  const data: (string | number)[][] = [["Table", "Seat", "Name"]];
+  // Get seatsPerTable from first table (they should all have the same value)
+  const seatsPerTable = tables[0]?.seatsPerTable || 10;
+
+  // Add metadata row with seatsPerTable info, then header row, then data
+  const data: (string | number)[][] = [
+    ["SeatsPerTable", seatsPerTable, "", ""], // Metadata row
+    ["Table", "Seat", "Name"], // Header row
+  ];
 
   tables.forEach((table) => {
     table.participants.forEach((p) => {

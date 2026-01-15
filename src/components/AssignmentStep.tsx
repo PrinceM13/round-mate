@@ -83,6 +83,7 @@ export function AssignmentStep({
   const handleExportExcel = () => {
     const exportTables = tables.map((table) => ({
       id: table.id,
+      seatsPerTable: table.seatsPerTable,
       participants: participants
         .filter((p) => p.tableId === table.id)
         .sort((a, b) => (a.seatNumber ?? 0) - (b.seatNumber ?? 0))
