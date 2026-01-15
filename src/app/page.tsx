@@ -21,10 +21,68 @@ export default function Home() {
     seats: number
   ) => {
     setSeatsPerTable(seats);
-    const { participants: assigned, tables: generatedTables } =
-      autoAssignParticipants(newParticipants, seats);
-    setParticipants(assigned);
-    setTables(generatedTables);
+
+    // Check if participants already have assignments (coming back from assignment step)
+    const hasExistingAssignments = newParticipants.some(
+      (p) => p.tableId !== null && p.seatNumber !== null
+    );
+
+    if (hasExistingAssignments) {
+      // Preserve existing assignments, only auto-assign new participants without assignments
+      const participantsWithoutAssignment = newParticipants.filter(
+        (p) => p.tableId === null || p.seatNumber === null
+      );
+
+      if (participantsWithoutAssignment.length > 0) {
+        // Auto-assign only new participants
+        const { participants: newlyAssigned } = autoAssignParticipants(
+          participantsWithoutAssignment,
+          seats
+        );
+
+        // Merge with existing assignments
+        const allParticipants = newParticipants.map((p) => {
+          if (p.tableId !== null && p.seatNumber !== null) {
+            return p; // Keep existing assignment
+          }
+          return newlyAssigned.find((np) => np.id === p.id) || p;
+        });
+
+        setParticipants(allParticipants);
+      } else {
+        setParticipants(newParticipants);
+      }
+
+      // Rebuild tables from participant assignments
+      const tableMap = new Map<number, Participant[]>();
+      newParticipants.forEach((p) => {
+        if (p.tableId !== null) {
+          if (!tableMap.has(p.tableId)) {
+            tableMap.set(p.tableId, []);
+          }
+          tableMap.get(p.tableId)!.push(p);
+        }
+      });
+
+      const rebuiltTables: Table[] = Array.from(tableMap.entries())
+        .sort(([a], [b]) => a - b)
+        .map(([tableId, participants]) => ({
+          id: tableId,
+          seatsPerTable: seats,
+          participants: participants.sort(
+            (a, b) => (a.seatNumber ?? 0) - (b.seatNumber ?? 0)
+          ),
+        }));
+
+      setTables(rebuiltTables);
+    } else {
+      // First time assignment - randomize everything
+      const { participants: assigned, tables: generatedTables } =
+        autoAssignParticipants(newParticipants, seats);
+      setParticipants(assigned);
+      setTables(generatedTables);
+    }
+
     setStep("assignment");
   };
 
@@ -274,7 +332,10 @@ export default function Home() {
             tables={tables}
             seatsPerTable={seatsPerTable}
             onNext={handleAssignmentComplete}
-            onBack={() => setStep("input")}
+            onBack={(updatedParticipants) => {
+              setParticipants(updatedParticipants);
+              setStep("input");
+            }}
           />
         )}
 

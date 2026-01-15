@@ -11,7 +11,7 @@ interface AssignmentStepProps {
   tables: Table[];
   seatsPerTable: number;
   onNext: (participants: Participant[], tables: Table[]) => void;
-  onBack: () => void;
+  onBack: (participants: Participant[]) => void;
 }
 
 export function AssignmentStep({
@@ -176,7 +176,7 @@ export function AssignmentStep({
       {/* Action Buttons */}
       <div className="flex flex-wrap gap-3">
         <button
-          onClick={onBack}
+          onClick={() => onBack(participants)}
           className="hover:border-primary hover:bg-primary/5 rounded-lg border-2 border-slate-300 px-6 py-3 font-semibold text-slate-900 transition-all dark:border-slate-700 dark:text-white"
         >
           ← Back
