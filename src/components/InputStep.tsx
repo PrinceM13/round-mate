@@ -12,6 +12,8 @@ interface InputStepProps {
     tables: Table[],
     seatsPerTable: number
   ) => void;
+  initialParticipants?: Participant[];
+  initialSeatsPerTable?: number;
 }
 
 interface ValidationModal {
@@ -24,9 +26,15 @@ interface ValidationModal {
   seatsPerTable: number;
 }
 
-export function InputStep({ onNext, onResume }: InputStepProps) {
-  const [participants, setParticipants] = useState<Participant[]>([]);
-  const [seatsPerTable, setSeatsPerTable] = useState(10);
+export function InputStep({
+  onNext,
+  onResume,
+  initialParticipants = [],
+  initialSeatsPerTable = 10,
+}: InputStepProps) {
+  const [participants, setParticipants] =
+    useState<Participant[]>(initialParticipants);
+  const [seatsPerTable, setSeatsPerTable] = useState(initialSeatsPerTable);
   const [newName, setNewName] = useState("");
   const [excelError, setExcelError] = useState("");
   const [fileStatus, setFileStatus] = useState<{

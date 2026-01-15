@@ -263,6 +263,8 @@ export default function Home() {
           <InputStep
             onNext={handleStartAssignment}
             onResume={handleResumeAssignment}
+            initialParticipants={participants}
+            initialSeatsPerTable={seatsPerTable}
           />
         )}
 
