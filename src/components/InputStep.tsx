@@ -6,7 +6,11 @@ import type { ValidationIssue } from "@/lib/excel";
 import { parseExcelFile, generateExcelTemplate } from "@/lib/excel";
 
 interface InputStepProps {
-  onNext: (participants: Participant[], seatsPerTable: number) => void;
+  onNext: (
+    participants: Participant[],
+    seatsPerTable: number,
+    randomize: boolean
+  ) => void;
   onResume?: (
     participants: Participant[],
     tables: Table[],
@@ -35,6 +39,7 @@ export function InputStep({
   const [participants, setParticipants] =
     useState<Participant[]>(initialParticipants);
   const [seatsPerTable, setSeatsPerTable] = useState(initialSeatsPerTable);
+  const [randomizeSeating, setRandomizeSeating] = useState(false);
   const [newName, setNewName] = useState("");
   const [excelError, setExcelError] = useState("");
   const [fileStatus, setFileStatus] = useState<{
@@ -252,7 +257,7 @@ export function InputStep({
       alert("Please add at least one participant");
       return;
     }
-    onNext(participants, seatsPerTable);
+    onNext(participants, seatsPerTable, randomizeSeating);
   };
 
   return (
@@ -446,6 +451,29 @@ export function InputStep({
               ))
             )}
           </div>
+
+          {/* Randomize Seating Option - only show for initial assignment */}
+          {!participants.some((p) => p.tableId !== null && p.seatNumber !== null) && (
+            <div className="mt-6 flex items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-900">
+              <input
+                type="checkbox"
+                id="randomize"
+                checked={randomizeSeating}
+                onChange={(e) => setRandomizeSeating(e.target.checked)}
+                className="text-primary focus:ring-primary h-5 w-5 rounded border-slate-300 focus:ring-2 dark:border-slate-700"
+              />
+              <label
+                htmlFor="randomize"
+                className="cursor-pointer text-sm text-slate-700 dark:text-slate-300"
+              >
+                <span className="font-semibold">Randomize seating order</span>
+                <p className="text-xs text-slate-500 dark:text-slate-400">
+                  When unchecked, participants will be assigned to tables in the
+                  order they appear in the list
+                </p>
+              </label>
+            </div>
+          )}
 
           <button
             onClick={handleProceed}

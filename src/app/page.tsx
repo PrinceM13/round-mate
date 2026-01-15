@@ -18,7 +18,8 @@ export default function Home() {
 
   const handleStartAssignment = (
     newParticipants: Participant[],
-    seats: number
+    seats: number,
+    randomize: boolean
   ) => {
     setSeatsPerTable(seats);
 
@@ -37,7 +38,8 @@ export default function Home() {
         // Auto-assign only new participants
         const { participants: newlyAssigned } = autoAssignParticipants(
           participantsWithoutAssignment,
-          seats
+          seats,
+          randomize
         );
 
         // Merge with existing assignments
@@ -84,9 +86,9 @@ export default function Home() {
 
       setTables(rebuiltTables);
     } else {
-      // First time assignment - randomize everything
+      // First time assignment - use randomize option from user
       const { participants: assigned, tables: generatedTables } =
-        autoAssignParticipants(newParticipants, seats);
+        autoAssignParticipants(newParticipants, seats, randomize);
       setParticipants(assigned);
       setTables(generatedTables);
     }

@@ -5,15 +5,18 @@ import type { Participant, Table } from "@/types";
  */
 export function autoAssignParticipants(
   participants: Participant[],
-  seatsPerTable: number
+  seatsPerTable: number,
+  randomize: boolean = false
 ): { participants: Participant[]; tables: Table[] } {
-  // Shuffle participants randomly
-  const shuffled = [...participants].sort(() => Math.random() - 0.5);
+  // Shuffle participants randomly if randomize is true, otherwise keep original order
+  const shuffled = randomize
+    ? [...participants].sort(() => Math.random() - 0.5)
+    : [...participants];
 
   // Calculate number of tables needed + 1 extra dummy table
   const numTables = Math.ceil(shuffled.length / seatsPerTable) + 1;
   console.log(
-    `autoAssignParticipants: ${shuffled.length} participants, ${seatsPerTable} seats/table = ${numTables} tables`
+    `autoAssignParticipants: ${shuffled.length} participants, ${seatsPerTable} seats/table = ${numTables} tables (randomize: ${randomize})`
   );
 
   // Initialize tables
