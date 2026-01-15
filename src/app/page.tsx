@@ -74,6 +74,14 @@ export default function Home() {
           ),
         }));
 
+      // Add one extra empty dummy table
+      const maxTableId = Math.max(...rebuiltTables.map((t) => t.id), -1);
+      rebuiltTables.push({
+        id: maxTableId + 1,
+        seatsPerTable: seats,
+        participants: [],
+      });
+
       setTables(rebuiltTables);
     } else {
       // First time assignment - randomize everything

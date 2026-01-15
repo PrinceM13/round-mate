@@ -28,7 +28,12 @@ export function AssignmentStep({
     participantId?: string;
   } | null>(null);
 
-  const tables = generateTables(participants, seatsPerTable);
+  // Use tables from props and regenerate them when participants change
+  const tables = generateTables(
+    participants,
+    seatsPerTable,
+    initialTables.length
+  );
 
   const handleSeatClick = (
     tableId: number,

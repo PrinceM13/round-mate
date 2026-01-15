@@ -10,8 +10,11 @@ export function autoAssignParticipants(
   // Shuffle participants randomly
   const shuffled = [...participants].sort(() => Math.random() - 0.5);
 
-  // Calculate number of tables needed
-  const numTables = Math.ceil(shuffled.length / seatsPerTable);
+  // Calculate number of tables needed + 1 extra dummy table
+  const numTables = Math.ceil(shuffled.length / seatsPerTable) + 1;
+  console.log(
+    `autoAssignParticipants: ${shuffled.length} participants, ${seatsPerTable} seats/table = ${numTables} tables`
+  );
 
   // Initialize tables
   const tables: Table[] = Array.from({ length: numTables }, (_, i) => ({
@@ -72,11 +75,14 @@ export function swapParticipants(
  */
 export function generateTables(
   participants: Participant[],
-  seatsPerTable: number
+  seatsPerTable: number,
+  numTables?: number
 ): Table[] {
-  const numTables = Math.ceil(participants.length / seatsPerTable);
+  // Use provided numTables or calculate based on participants
+  const tableCount =
+    numTables ?? Math.ceil(participants.length / seatsPerTable);
 
-  return Array.from({ length: numTables }, (_, tableId) => ({
+  return Array.from({ length: tableCount }, (_, tableId) => ({
     id: tableId,
     seatsPerTable,
     participants: participants.filter((p) => p.tableId === tableId),
