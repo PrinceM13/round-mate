@@ -35,19 +35,83 @@ export default function Home() {
       );
 
       if (participantsWithoutAssignment.length > 0) {
-        // Auto-assign only new participants
-        const { participants: newlyAssigned } = autoAssignParticipants(
-          participantsWithoutAssignment,
-          seats,
-          randomize
+        // Find vacant seats in existing tables
+        const participantsWithAssignment = newParticipants.filter(
+          (p) => p.tableId !== null && p.seatNumber !== null
         );
+
+        // Build table occupancy map
+        const tableOccupancy = new Map<number, Set<number>>();
+        participantsWithAssignment.forEach((p) => {
+          if (p.tableId !== null && p.seatNumber !== null) {
+            if (!tableOccupancy.has(p.tableId)) {
+              tableOccupancy.set(p.tableId, new Set());
+            }
+            tableOccupancy.get(p.tableId)!.add(p.seatNumber);
+          }
+        });
+
+        // Assign new participants to vacant seats
+        const updatedNewParticipants = [...participantsWithoutAssignment];
+        let assignmentIndex = 0;
+
+        // Find the maximum table ID
+        const maxTableId = Math.max(
+          ...participantsWithAssignment.map((p) => p.tableId ?? -1),
+          -1
+        );
+
+        // Try to fill vacant seats in existing tables first
+        for (
+          let tableId = 0;
+          tableId <= maxTableId &&
+          assignmentIndex < updatedNewParticipants.length;
+          tableId++
+        ) {
+          const occupiedSeats = tableOccupancy.get(tableId) || new Set();
+
+          for (
+            let seatNumber = 0;
+            seatNumber < seats &&
+            assignmentIndex < updatedNewParticipants.length;
+            seatNumber++
+          ) {
+            if (!occupiedSeats.has(seatNumber)) {
+              updatedNewParticipants[assignmentIndex] = {
+                ...updatedNewParticipants[assignmentIndex],
+                tableId,
+                seatNumber,
+              };
+              assignmentIndex++;
+            }
+          }
+        }
+
+        // If there are still unassigned participants, add them to the dummy table
+        let dummyTableId = maxTableId + 1;
+        let dummySeatNumber = 0;
+        while (assignmentIndex < updatedNewParticipants.length) {
+          updatedNewParticipants[assignmentIndex] = {
+            ...updatedNewParticipants[assignmentIndex],
+            tableId: dummyTableId,
+            seatNumber: dummySeatNumber,
+          };
+          assignmentIndex++;
+          dummySeatNumber++;
+
+          // Move to next dummy table if current one is full
+          if (dummySeatNumber >= seats) {
+            dummyTableId++;
+            dummySeatNumber = 0;
+          }
+        }
 
         // Merge with existing assignments
         const allParticipants = newParticipants.map((p) => {
           if (p.tableId !== null && p.seatNumber !== null) {
             return p; // Keep existing assignment
           }
-          return newlyAssigned.find((np) => np.id === p.id) || p;
+          return updatedNewParticipants.find((np) => np.id === p.id) || p;
         });
 
         setParticipants(allParticipants);
@@ -142,6 +206,9 @@ export default function Home() {
             </div>
             <span className="text-xl font-bold text-slate-900 dark:text-white">
               Round Mate
+            </span>
+            <span className="text-xs text-slate-500 dark:text-slate-400">
+              v0.1.0
             </span>
           </button>
           {step !== "home" && (
